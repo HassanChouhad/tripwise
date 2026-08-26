@@ -108,8 +108,8 @@
   --content-max-width: 1400px;
 }
 
-/* ---------- Light Theme ---------- */
-[data-theme="light"] {
+/* ---------- Light Theme (main content only — sidebar stays dark) ---------- */
+[data-theme="light"] .main-content {
   --color-bg-primary: #F8FAFC;
   --color-bg-secondary: #FFFFFF;
   --color-bg-tertiary: #F1F5F9;
@@ -129,8 +129,7 @@
   --color-overlay: rgba(0, 0, 0, 0.3);
 
   --gradient-dark: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
-  --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
-  --gradient-sidebar: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.7) 100%);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -138,6 +137,15 @@
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
   --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.15);
   --shadow-glow-coral: 0 0 20px rgba(244, 63, 94, 0.1);
+
+  background: #F8FAFC;
+  color: #0F172A;
+}
+
+[data-theme="light"] .main-content .glass-card,
+[data-theme="light"] .main-content [class*="Card"],
+[data-theme="light"] .main-content [class*="card"] {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 /* ---------- Reset ---------- */
