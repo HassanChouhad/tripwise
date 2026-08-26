@@ -124,6 +124,24 @@
   margin: var(--space-2) var(--space-4);
 }
 
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.themeToggle:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-hover);
+}
+
 .aiPlanner {
   margin: var(--space-3);
   padding: var(--space-4);

@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Home, Compass, Map, Plane, Building2, Route, CloudSun,
-  Backpack, Tag, User, Settings, Sparkles, Menu, X
+  Backpack, Tag, User, Settings, Sparkles, Menu, X, Sun, Moon
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './Sidebar.module.css';
 import AiPlannerModal from '../ai/AiPlannerModal';
 
@@ -30,6 +31,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <>
@@ -82,6 +84,16 @@ export default function Sidebar() {
             );
           })}
         </nav>
+
+        <button
+          className={styles.themeToggle}
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          id="theme-toggle-btn"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
 
         <div className={styles.aiPlanner}>
           <div className={styles.aiPlannerBadge}>

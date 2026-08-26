@@ -108,6 +108,38 @@
   --content-max-width: 1400px;
 }
 
+/* ---------- Light Theme ---------- */
+[data-theme="light"] {
+  --color-bg-primary: #F8FAFC;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F1F5F9;
+  --color-bg-hover: #E2E8F0;
+  --color-bg-active: #CBD5E1;
+  --color-bg-input: #FFFFFF;
+
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #94A3B8;
+  --color-text-inverse: #F1F5F9;
+
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-light: rgba(0, 0, 0, 0.12);
+  --color-glass: rgba(255, 255, 255, 0.85);
+  --color-glass-lighter: rgba(241, 245, 249, 0.6);
+  --color-overlay: rgba(0, 0, 0, 0.3);
+
+  --gradient-dark: linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%);
+  --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
+  --gradient-sidebar: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.15);
+  --shadow-glow-coral: 0 0 20px rgba(244, 63, 94, 0.1);
+}
+
 /* ---------- Reset ---------- */
 *,
 *::before,
