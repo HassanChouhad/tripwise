@@ -1,0 +1,76 @@
+{
+  "popular": [
+    {
+      "id": "dest-001",
+      "city": "Tokyo",
+      "country": "Japan",
+      "code": "NRT",
+      "image": "/images/dest-tokyo.jpg",
+      "avgTemp": 20,
+      "flightsFrom": 620,
+      "currency": "€",
+      "tags": ["Culture", "Food", "Shopping", "Technology"],
+      "description": "A fascinating blend of ultramodern and traditional, from neon-lit skyscrapers to historic temples."
+    },
+    {
+      "id": "dest-002",
+      "city": "Bali",
+      "country": "Indonesia",
+      "code": "DPS",
+      "image": "/images/dest-bali.jpg",
+      "avgTemp": 30,
+      "flightsFrom": 680,
+      "currency": "€",
+      "tags": ["Beach", "Nature", "Wellness", "Adventure"],
+      "description": "Enchanting island of lush rice terraces, stunning temples, and world-class surfing."
+    },
+    {
+      "id": "dest-003",
+      "city": "Paris",
+      "country": "France",
+      "code": "CDG",
+      "image": "/images/dest-paris.jpg",
+      "avgTemp": 15,
+      "flightsFrom": 85,
+      "currency": "€",
+      "tags": ["Romance", "Art", "Food", "History"],
+      "description": "The City of Light captivates with iconic landmarks, world-class cuisine, and timeless elegance."
+    },
+    {
+      "id": "dest-004",
+      "city": "New York",
+      "country": "USA",
+      "code": "JFK",
+      "image": "/images/dest-newyork.jpg",
+      "avgTemp": 16,
+      "flightsFrom": 420,
+      "currency": "€",
+      "tags": ["City", "Culture", "Food", "Entertainment"],
+      "description": "The city that never sleeps offers endless entertainment, diverse neighborhoods, and iconic skylines."
+    },
+    {
+      "id": "dest-005",
+      "city": "Santorini",
+      "country": "Greece",
+      "code": "JTR",
+      "image": "/images/dest-santorini.jpg",
+      "avgTemp": 25,
+      "flightsFrom": 180,
+      "currency": "€",
+      "tags": ["Romance", "Beach", "Views", "Wine"],
+      "description": "Dramatic cliffs, whitewashed villages, and mesmerizing sunsets over the Aegean Sea."
+    },
+    {
+      "id": "dest-006",
+      "city": "Dubai",
+      "country": "UAE",
+      "code": "DXB",
+      "image": "/images/dest-dubai.jpg",
+      "avgTemp": 33,
+      "flightsFrom": 310,
+      "currency": "€",
+      "tags": ["Luxury", "Shopping", "Architecture", "Desert"],
+      "description": "A futuristic metropolis rising from the desert with record-breaking architecture and luxury experiences."
+    }
+  ]
+}

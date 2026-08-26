@@ -1,0 +1,90 @@
+{
+  "conditions": {
+    "rain": {
+      "items": ["Umbrella", "Waterproof jacket", "Waterproof shoes", "Quick-dry towel"],
+      "icon": "☔"
+    },
+    "cold": {
+      "items": ["Warm jacket", "Thermal underwear", "Scarf", "Gloves", "Beanie"],
+      "icon": "🧥"
+    },
+    "mild": {
+      "items": ["Light jacket", "Comfortable shoes", "Layered clothing"],
+      "icon": "🧣"
+    },
+    "hot": {
+      "items": ["Sunscreen SPF 50+", "Sun hat", "Sunglasses", "Light cotton clothes", "Sandals", "Water bottle"],
+      "icon": "☀️"
+    },
+    "humid": {
+      "items": ["Moisture-wicking clothes", "Deodorant", "Anti-chafing cream", "Light breathable fabrics"],
+      "icon": "💧"
+    },
+    "snow": {
+      "items": ["Winter boots", "Heavy coat", "Thermal socks", "Hand warmers", "Snow gloves"],
+      "icon": "❄️"
+    },
+    "windy": {
+      "items": ["Windbreaker", "Hair ties", "Secure hat"],
+      "icon": "💨"
+    }
+  },
+  "essentials": [
+    "Passport & copies",
+    "Travel adapter (Type A/B for Japan)",
+    "Phone charger & power bank",
+    "First aid kit",
+    "Medications",
+    "Travel insurance documents"
+  ],
+  "techEssentials": [
+    "Portable charger",
+    "Universal adapter",
+    "Noise-canceling headphones",
+    "Camera / GoPro"
+  ],
+  "weatherRanges": {
+    "cold": { "maxTemp": 10 },
+    "mild": { "minTemp": 10, "maxTemp": 20 },
+    "hot": { "minTemp": 25 },
+    "rain": { "conditions": ["Rain", "Drizzle", "Thunderstorm", "Showers"] },
+    "snow": { "conditions": ["Snow", "Sleet", "Blizzard"] },
+    "humid": { "minHumidity": 75 },
+    "windy": { "minWindSpeed": 30 }
+  },
+  "mockWeather": {
+    "Tokyo": {
+      "dateRange": "Oct 10 – Oct 13",
+      "tempHigh": 18,
+      "tempLow": 13,
+      "condition": "Partly Cloudy",
+      "icon": "⛅",
+      "humidity": 65,
+      "windSpeed": 12,
+      "precipitation": 20,
+      "packingConditions": ["mild", "rain"]
+    },
+    "Kyoto": {
+      "dateRange": "Oct 13 – Oct 16",
+      "tempHigh": 16,
+      "tempLow": 11,
+      "condition": "Light Rain",
+      "icon": "🌧️",
+      "humidity": 72,
+      "windSpeed": 8,
+      "precipitation": 60,
+      "packingConditions": ["mild", "rain"]
+    },
+    "Osaka": {
+      "dateRange": "Oct 16 – Oct 19",
+      "tempHigh": 19,
+      "tempLow": 12,
+      "condition": "Sunny",
+      "icon": "☀️",
+      "humidity": 55,
+      "windSpeed": 10,
+      "precipitation": 10,
+      "packingConditions": ["mild"]
+    }
+  }
+}
