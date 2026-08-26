@@ -21,28 +21,31 @@ export default function TripsPage() {
           </p>
         </div>
       ) : (
-        savedTrips.map((trip) => (
-          <div key={trip.id} style={{ marginBottom: 'var(--space-6)', position: 'relative' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-              <button
-                onClick={() => deleteTrip(trip.id)}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  color: 'var(--color-accent-red)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: 'var(--font-size-xs)'
-                }}
-              >
-                🗑️ Delete Trip
-              </button>
+        savedTrips.map((trip) => {
+          const legs = trip.legs || trip.flights || [];
+          return (
+            <div key={trip.id} style={{ marginBottom: 'var(--space-6)', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                <button
+                  onClick={() => deleteTrip(trip.id)}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    color: 'var(--color-accent-red)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: 'var(--font-size-xs)'
+                  }}
+                >
+                  🗑️ Delete Trip
+                </button>
+              </div>
+              <ItineraryTimeline searchResults={{ flights: legs, destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10' }} />
             </div>
-            <ItineraryTimeline searchResults={{ flights: trip.legs, destinations: trip.legs.map(l => ({ name: l.route })), startDate: '2025-10-10' }} />
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

@@ -14,7 +14,8 @@ const mcpTools = [
         date: { type: "string", description: "Date of travel (YYYY-MM-DD)" }
       },
       required: ["origin", "destinations"]
-    }
+    },
+    annotations: { readOnlyHint: true }
   },
   {
     name: "search_hotels",
@@ -25,7 +26,8 @@ const mcpTools = [
         city: { type: "string", description: "City to search hotels in (Marseille, Tokyo, Kyoto, Osaka, London, Rome)" },
         date: { type: "string", description: "Check-in date (YYYY-MM-DD)" }
       }
-    }
+    },
+    annotations: { readOnlyHint: true }
   },
   {
     name: "get_weather_and_packing",
@@ -35,7 +37,92 @@ const mcpTools = [
       properties: {
         cities: { type: "array", items: { type: "string" }, description: "Cities to get weather for" }
       }
-    }
+    },
+    annotations: { readOnlyHint: true }
+  },
+  {
+    name: "get_hotel_details",
+    description: "Get full details for a specific hotel by ID, including amenities, star rating, distance to center, and nightly price.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        hotel_id: { type: "string", description: "The hotel ID from search results" }
+      },
+      required: ["hotel_id"]
+    },
+    annotations: { readOnlyHint: true }
+  },
+  {
+    name: "create_trip",
+    description: "Create a new trip with destinations, dates, and traveler count. Returns a trip ID for selecting flights and hotels.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Trip name (e.g. 'Japan Adventure')" },
+        destinations: { type: "array", items: { type: "string" }, description: "List of destination cities" },
+        start_date: { type: "string", description: "Trip start date (YYYY-MM-DD)" },
+        end_date: { type: "string", description: "Trip end date (YYYY-MM-DD)" },
+        travelers: { type: "number", description: "Number of travelers" }
+      },
+      required: ["name", "destinations", "start_date", "end_date"]
+    },
+    annotations: { readOnlyHint: false }
+  },
+  {
+    name: "select_flight",
+    description: "Select a flight for the trip by flight ID. Adds it to the trip itinerary.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        trip_id: { type: "string", description: "The trip ID from create_trip" },
+        flight_id: { type: "string", description: "The flight ID from search results" }
+      },
+      required: ["trip_id", "flight_id"]
+    },
+    annotations: { readOnlyHint: false }
+  },
+  {
+    name: "select_hotel",
+    description: "Select a hotel for the trip by hotel ID. Adds it to the trip itinerary.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        trip_id: { type: "string", description: "The trip ID from create_trip" },
+        hotel_id: { type: "string", description: "The hotel ID from search results" }
+      },
+      required: ["trip_id", "hotel_id"]
+    },
+    annotations: { readOnlyHint: false }
+  },
+  {
+    name: "prepare_booking",
+    description: "Prepare a booking summary for the trip with all selected flights, hotels, and total cost. Returns a booking confirmation ready for review.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        trip_id: { type: "string", description: "The trip ID from create_trip" }
+      },
+      required: ["trip_id"]
+    },
+    annotations: { readOnlyHint: true }
+  },
+  {
+    name: "save_trip",
+    description: "Save the planned trip to the user's saved trips list so it appears on the Trips page. Call after prepare_booking to persist the trip.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        trip_id: { type: "string", description: "The trip ID from create_trip" },
+        name: { type: "string", description: "Trip name" },
+        destinations: { type: "array", items: { type: "string" }, description: "List of destination cities" },
+        start_date: { type: "string", description: "Trip start date" },
+        end_date: { type: "string", description: "Trip end date" },
+        travelers: { type: "number", description: "Number of travelers" },
+        booking_id: { type: "string", description: "Booking ID from prepare_booking" }
+      },
+      required: ["trip_id", "name", "destinations"]
+    },
+    annotations: { readOnlyHint: false }
   }
 ];
 
@@ -45,6 +132,23 @@ export default function WebMCPRegistrar() {
 
     // Helper tool execution handler
     const executeTool = async (name, params) => {
+      if (name === 'save_trip') {
+        const trip = {
+          id: params.trip_id || `trip_${Date.now()}`,
+          name: params.name,
+          destinations: params.destinations || [],
+          start_date: params.start_date,
+          end_date: params.end_date,
+          travelers: params.travelers || 1,
+          booking_id: params.booking_id,
+          created_at: new Date().toISOString()
+        };
+        const stored = localStorage.getItem('tripwise_saved_trips');
+        const trips = stored ? JSON.parse(stored) : [];
+        trips.unshift(trip);
+        localStorage.setItem('tripwise_saved_trips', JSON.stringify(trips));
+        return { result: { message: `Trip "${trip.name}" saved successfully`, trip } };
+      }
       try {
         const res = await fetch('/api/mcp', {
           method: 'POST',
@@ -66,6 +170,7 @@ export default function WebMCPRegistrar() {
             name: tool.name,
             description: tool.description,
             inputSchema: tool.inputSchema,
+            annotations: tool.annotations,
             execute: (input) => executeTool(tool.name, input)
           });
         } catch (e) {

@@ -16,9 +16,12 @@ export default function ItineraryPage() {
       {savedTrips.length === 0 ? (
         <ItineraryTimeline />
       ) : (
-        savedTrips.map((trip, idx) => (
-          <ItineraryTimeline key={idx} searchResults={{ flights: trip.legs, destinations: trip.legs.map(l => ({ name: l.route })), startDate: '2025-10-10' }} />
-        ))
+        savedTrips.map((trip, idx) => {
+          const legs = trip.legs || trip.flights || [];
+          return (
+            <ItineraryTimeline key={idx} searchResults={{ flights: legs, destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10' }} />
+          );
+        })
       )}
     </div>
   );
