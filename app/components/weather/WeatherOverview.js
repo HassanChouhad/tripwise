@@ -5,9 +5,24 @@ import { CloudSun, Backpack, Check } from 'lucide-react';
 import packingRules from '../../data/packing-rules.json';
 import styles from './WeatherOverview.module.css';
 
-export default function WeatherOverview() {
-  const [selectedCity, setSelectedCity] = useState('Tokyo');
-  const weatherData = packingRules.mockWeather;
+export default function WeatherOverview({ searchResults }) {
+  const rawCities = searchResults && searchResults.destinations
+    ? searchResults.destinations.map(d => d.name.split(',')[0])
+    : ['Tokyo', 'Kyoto', 'Osaka'];
+
+  const activeCities = Array.from(new Set(rawCities));
+
+  const [selectedCity, setSelectedCity] = useState(activeCities[0] || 'Tokyo');
+
+  const cityWeatherList = activeCities.map((city, idx) => ({
+    city,
+    dateRange: searchResults?.startDate ? `Day ${idx * 3 + 1} – ${idx * 3 + 3}` : 'Oct 10 – Oct 13',
+    tempHigh: 18 + (idx * 2),
+    tempLow: 12 + idx,
+    icon: idx % 2 === 0 ? '⛅' : '🌧️'
+  }));
+
+  const currentCityName = activeCities.includes(selectedCity) ? selectedCity : activeCities[0];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
@@ -20,14 +35,14 @@ export default function WeatherOverview() {
           </div>
         </div>
 
-        {Object.entries(weatherData).map(([city, data]) => (
-          <div key={city} className={styles.cityRow}>
+        {cityWeatherList.map((item) => (
+          <div key={item.city} className={styles.cityRow}>
             <div>
-              <div className={styles.cityName}>{city}</div>
-              <div className={styles.cityDates}>{data.dateRange}</div>
+              <div className={styles.cityName}>{item.city}</div>
+              <div className={styles.cityDates}>{item.dateRange}</div>
             </div>
             <div className={styles.temp}>
-              {data.icon} {data.tempHigh}° / {data.tempLow}°
+              {item.icon} {item.tempHigh}° / {item.tempLow}°
             </div>
           </div>
         ))}
@@ -43,10 +58,10 @@ export default function WeatherOverview() {
         </div>
 
         <div className={styles.packingTabs}>
-          {Object.keys(weatherData).map((city) => (
+          {activeCities.map((city) => (
             <button
               key={city}
-              className={`${styles.tab} ${selectedCity === city ? styles.activeTab : ''}`}
+              className={`${styles.tab} ${currentCityName === city ? styles.activeTab : ''}`}
               onClick={() => setSelectedCity(city)}
             >
               {city}
@@ -61,13 +76,12 @@ export default function WeatherOverview() {
               {item}
             </div>
           ))}
-          {weatherData[selectedCity]?.packingConditions.includes('rain') &&
-            packingRules.conditions.rain.items.map((item, idx) => (
-              <div key={`rain-${idx}`} className={styles.item}>
-                <Check size={14} color="var(--color-accent-green)" />
-                {item}
-              </div>
-            ))}
+          {packingRules.conditions.rain.items.map((item, idx) => (
+            <div key={`rain-${idx}`} className={styles.item}>
+              <Check size={14} color="var(--color-accent-green)" />
+              {item}
+            </div>
+          ))}
         </div>
       </div>
     </div>

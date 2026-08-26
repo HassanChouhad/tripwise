@@ -4,8 +4,33 @@ import { Check, Sparkles } from 'lucide-react';
 import flightData from '../../data/flights.json';
 import styles from './ItineraryTimeline.module.css';
 
-export default function ItineraryTimeline() {
-  const itinerary = flightData.bestItinerary;
+export default function ItineraryTimeline({ searchResults }) {
+  // If dynamic search results exist, use them; otherwise fallback to initial itinerary
+  const hasDynamic = searchResults && searchResults.flights && searchResults.flights.length > 0;
+  
+  const itinerary = hasDynamic ? {
+    title: `Best Itinerary Found from ${searchResults.destinations[0]?.name.split(',')[0]}`,
+    subtitle: `Optimized for ${searchResults.startDate}`,
+    totalPrice: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
+    pricePerPerson: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
+    legs: searchResults.destinations.slice(0, -1).map((d, i) => {
+      const flight = searchResults.flights[i] || searchResults.flights[0];
+      return {
+        month: new Date(searchResults.startDate).toLocaleString('default', { month: 'short' }).toUpperCase(),
+        day: new Date(searchResults.startDate).getDate() + (i * 3),
+        route: `${d.name.split(',')[0]} → ${searchResults.destinations[i + 1]?.name.split(',')[0]}`,
+        details: `${flight ? flight.airlineCode : 'AF'} 10:30 → 18:45`,
+        airline: flight ? flight.airline : 'Air France',
+        duration: flight ? flight.duration : '8h 15m',
+        stops: flight && flight.stops === 0 ? 'Direct' : '1 stop'
+      };
+    }),
+    includes: [
+      "Flights + Hotels",
+      "Multi-city Itinerary",
+      "24/7 Support"
+    ]
+  } : flightData.bestItinerary;
 
   return (
     <div className={styles.itinerarySection}>

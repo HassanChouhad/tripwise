@@ -1,29 +1,28 @@
 import { NextResponse } from 'next/server';
-import flights from '@/app/data/flights.json';
-import hotels from '@/app/data/hotels.json';
+import { searchFlightsFromDb, searchHotelsFromDb } from '@/lib/db';
 import packingRules from '@/app/data/packing-rules.json';
 
 const tools = [
   {
     name: "search_flights",
-    description: "Search for multi-city flight itineraries",
+    description: "Search multi-city flight itineraries in SQLite database by date and destination",
     inputSchema: {
       type: "object",
       properties: {
         origin: { type: "string" },
-        destinations: { type: "array", items: { type: "string" } },
-        dates: { type: "string" }
+        destination: { type: "string" },
+        date: { type: "string" }
       }
     }
   },
   {
     name: "search_hotels",
-    description: "Search for hotels by city and dates",
+    description: "Search hotels in SQLite database by city and date",
     inputSchema: {
       type: "object",
       properties: {
         city: { type: "string" },
-        maxPrice: { type: "number" }
+        date: { type: "string" }
       }
     }
   },
@@ -48,14 +47,13 @@ export async function POST(req) {
     const { tool, params } = await req.json();
 
     if (tool === 'search_flights') {
-      return NextResponse.json({ result: flights.bestItinerary });
+      const flights = searchFlightsFromDb(params?.origin, params?.destination, params?.date);
+      return NextResponse.json({ result: flights });
     }
 
     if (tool === 'search_hotels') {
-      const cityHotels = params?.city
-        ? hotels.hotels.filter(h => h.city.toLowerCase() === params.city.toLowerCase())
-        : hotels.hotels;
-      return NextResponse.json({ result: cityHotels });
+      const hotels = searchHotelsFromDb(params?.city, params?.date);
+      return NextResponse.json({ result: hotels });
     }
 
     if (tool === 'get_weather_and_packing') {
