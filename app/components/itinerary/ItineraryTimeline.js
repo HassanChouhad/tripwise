@@ -1,23 +1,30 @@
 'use client';
 
-import { Check, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Sparkles, Bookmark, Heart } from 'lucide-react';
 import flightData from '../../data/flights.json';
+import { useSavedTrips } from '../../context/SavedTripsContext';
 import styles from './ItineraryTimeline.module.css';
 
 export default function ItineraryTimeline({ searchResults }) {
-  // If dynamic search results exist, use them; otherwise fallback to initial itinerary
+  const { saveTrip } = useSavedTrips();
+  const [saved, setSaved] = useState(false);
+
   const hasDynamic = searchResults && searchResults.flights && searchResults.flights.length > 0;
   
   const itinerary = hasDynamic ? {
+    id: `trip-${Date.now()}`,
     title: `Best Itinerary Found from ${searchResults.destinations[0]?.name.split(',')[0]}`,
     subtitle: `Optimized for ${searchResults.startDate}`,
     totalPrice: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
     pricePerPerson: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
     legs: searchResults.destinations.slice(0, -1).map((d, i) => {
       const flight = searchResults.flights[i] || searchResults.flights[0];
+      const baseDate = new Date(searchResults.startDate || '2025-10-10');
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
       return {
-        month: new Date(searchResults.startDate).toLocaleString('default', { month: 'short' }).toUpperCase(),
-        day: new Date(searchResults.startDate).getDate() + (i * 3),
+        month: months[baseDate.getUTCMonth()],
+        day: baseDate.getUTCDate() + (i * 3),
         route: `${d.name.split(',')[0]} → ${searchResults.destinations[i + 1]?.name.split(',')[0]}`,
         details: `${flight ? flight.airlineCode : 'AF'} 10:30 → 18:45`,
         airline: flight ? flight.airline : 'Air France',
@@ -32,6 +39,12 @@ export default function ItineraryTimeline({ searchResults }) {
     ]
   } : flightData.bestItinerary;
 
+  const handleSaveTrip = () => {
+    saveTrip(itinerary);
+    setSaved(true);
+    alert('🎉 Trip and itinerary saved successfully! You can view it under "Trips", "Flights", and "Itineraries".');
+  };
+
   return (
     <div className={styles.itinerarySection}>
       <div className={styles.header}>
@@ -42,8 +55,14 @@ export default function ItineraryTimeline({ searchResults }) {
           </h2>
           <span className={styles.subtitle}>{itinerary.subtitle}</span>
         </div>
-        <button className={styles.viewDetailsBtn} id="view-details-btn">
-          View Details
+        <button
+          className={styles.viewDetailsBtn}
+          id="save-trip-btn"
+          onClick={handleSaveTrip}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: saved ? 'var(--color-accent-green)' : undefined, color: saved ? 'white' : undefined }}
+        >
+          <Bookmark size={14} />
+          {saved ? 'Trip Saved!' : 'Save Trip'}
         </button>
       </div>
 
@@ -91,8 +110,12 @@ export default function ItineraryTimeline({ searchResults }) {
             ))}
           </div>
 
-          <button className={styles.viewTripBtn} id="view-this-trip-btn">
-            View This Trip
+          <button
+            className={styles.viewTripBtn}
+            id="view-this-trip-btn"
+            onClick={handleSaveTrip}
+          >
+            {saved ? '✓ Trip Saved' : 'Save & View This Trip'}
           </button>
         </div>
       </div>

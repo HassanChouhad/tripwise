@@ -1,24 +1,29 @@
 import './globals.css';
 import Sidebar from './components/layout/Sidebar';
 import WebMCPRegistrar from './components/mcp/WebMCPRegistrar';
+import ClientOnly from './components/layout/ClientOnly';
+import { SavedTripsProvider } from './context/SavedTripsContext';
 
 export const metadata = {
   title: 'TripWise — AI-Powered Travel Planner',
-  description: 'Plan multi-city trips with optimized flights, hotels, weather forecasts, and smart packing suggestions. Powered by AI and WebMCP.',
-  keywords: 'travel, flights, hotels, trip planner, AI, multi-city, weather, packing',
+  description: 'Multi-city travel planning, flight & hotel booking with weather-aware packing suggestions.',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
-        <WebMCPRegistrar />
-        <div className="app-layout">
-          <Sidebar />
-          <main className="main-content">
-            {children}
-          </main>
-        </div>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <SavedTripsProvider>
+          <WebMCPRegistrar />
+          <div className="app-layout">
+            <ClientOnly>
+              <Sidebar />
+            </ClientOnly>
+            <main className="main-content">
+              {children}
+            </main>
+          </div>
+        </SavedTripsProvider>
       </body>
     </html>
   );

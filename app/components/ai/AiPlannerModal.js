@@ -27,13 +27,16 @@ export default function AiPlannerModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      // Execute WebMCP tools behind the scenes
       const flightRes = await fetch('/api/mcp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tool: 'search_flights', params: { query: userMsg } })
       });
       const flightData = await flightRes.json();
+      const flightsList = flightData.result || [];
+      const totalPrice = Array.isArray(flightsList)
+        ? flightsList.reduce((sum, f) => sum + (f.price || 0), 0) || 780
+        : (flightsList.totalPrice || 780);
 
       const weatherRes = await fetch('/api/mcp', {
         method: 'POST',
@@ -47,7 +50,7 @@ export default function AiPlannerModal({ isOpen, onClose }) {
         {
           sender: 'ai',
           toolsUsed: ['search_flights', 'search_hotels', 'get_weather_and_packing'],
-          text: `I've executed WebMCP tools to optimize your trip! Found multi-city flight itinerary for €${flightData.result.totalPrice} per person across Tokyo, Kyoto, and Osaka. Tokyo expects ~18°C mild weather, Kyoto 16°C (light rain), and Osaka 19°C (sunny). I recommend bringing a light waterproof jacket and umbrella for Kyoto!`
+          text: `I've executed WebMCP tools for your route ("${userMsg}")! Found multi-city itinerary starting at €${totalPrice} total per person. Checked weather & packing rules across your destinations: recommendations include a light jacket and comfortable footwear.`
         }
       ]);
     } catch (err) {
