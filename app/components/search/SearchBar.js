@@ -23,7 +23,7 @@ const features = [
 export default function SearchBar() {
   const [tripType, setTripType] = useState('Multi-city');
   const [destinations, setDestinations] = useState(defaultDestinations);
-  const [dates, setDates] = useState('Oct 10 – Oct 20, 2025');
+  const [startDate, setStartDate] = useState('2025-10-10');
   const [travelers, setTravelers] = useState(2);
   const [classType, setClassType] = useState('Economy');
 
@@ -93,10 +93,13 @@ export default function SearchBar() {
         <div className={styles.searchFields}>
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>Dates</span>
-            <div className={styles.fieldInput}>
-              <Calendar size={16} />
-              <span>{dates}</span>
-            </div>
+            <input
+              type="date"
+              className={styles.fieldInput}
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              id="date-picker-input"
+            />
           </div>
 
           <div className={styles.fieldGroup}>

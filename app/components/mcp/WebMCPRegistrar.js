@@ -41,20 +41,35 @@ const mcpTools = [
 
 export default function WebMCPRegistrar() {
   useEffect(() => {
-    // Expose tools via browser WebMCP standard (navigator.modelContext)
     if (typeof window !== 'undefined') {
-      if ('modelContext' in navigator) {
-        try {
-          // Standard WebMCP registration
-          navigator.modelContext.registerTools(mcpTools);
-          console.log('[WebMCP] Successfully registered tools on navigator.modelContext');
-        } catch (e) {
-          console.warn('[WebMCP] Tool registration error:', e);
-        }
+      const modelCtx = (typeof document !== 'undefined' && document.modelContext) ||
+                       (typeof navigator !== 'undefined' && navigator.modelContext);
+
+      if (modelCtx && typeof modelCtx.registerTool === 'function') {
+        mcpTools.forEach(tool => {
+          try {
+            modelCtx.registerTool({
+              name: tool.name,
+              description: tool.description,
+              inputSchema: tool.inputSchema,
+              execute: async (input) => {
+                const res = await fetch('/api/mcp', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ tool: tool.name, params: input })
+                });
+                return await res.json();
+              }
+            });
+          } catch (e) {
+            console.warn(`[WebMCP] Tool ${tool.name} registration error:`, e);
+          }
+        });
+        console.log('[WebMCP] Successfully registered tools via document.modelContext.registerTool');
       } else {
-        // Fallback window global for agent inspection
+        // Polyfill window context
         window.__WEBMCP_TOOLS__ = mcpTools;
-        console.log('[WebMCP] WebMCP polyfill fallback active on window.__WEBMCP_TOOLS__');
+        console.log('[WebMCP] WebMCP polyfill active on window.__WEBMCP_TOOLS__');
       }
     }
   }, []);
