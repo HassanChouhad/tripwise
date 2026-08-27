@@ -11,6 +11,12 @@ export const metadata = {
   description: 'Multi-city travel planning, flight & hotel booking with weather-aware packing suggestions.',
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>

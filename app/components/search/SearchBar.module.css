@@ -287,6 +287,18 @@
 }
 
 @media (max-width: 768px) {
+  .heroBanner {
+    height: 120px;
+  }
+
+  .heroBannerOverlay h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .heroBannerOverlay p {
+    font-size: var(--font-size-sm);
+  }
+
   .searchForm {
     flex-direction: column;
     padding: var(--space-4);
@@ -294,6 +306,15 @@
 
   .destinationChips {
     min-width: unset;
+    flex-direction: column;
+  }
+
+  .chip {
+    width: 100%;
+  }
+
+  .searchFields {
+    flex-direction: column;
   }
 
   .fieldGroup {

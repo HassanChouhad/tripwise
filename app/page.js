@@ -26,7 +26,7 @@ export default function Home() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 'var(--space-6)' }}>
+      <div className="home-grid">
         <ItineraryTimeline searchResults={searchResults} />
         <WeatherOverview searchResults={searchResults} />
       </div>
