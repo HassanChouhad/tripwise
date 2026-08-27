@@ -36,6 +36,7 @@ export default function SearchBar({ onSearchResults }) {
   const [tripType, setTripType] = useState('Multi-city');
   const [destinations, setDestinations] = useState(defaultDestinations);
   const [startDate, setStartDate] = useState('2025-10-10');
+  const [endDate, setEndDate] = useState('2025-10-20');
   const [travelers, setTravelers] = useState(2);
   const [classType, setClassType] = useState('Economy');
 
@@ -61,9 +62,9 @@ export default function SearchBar({ onSearchResults }) {
       const res = await fetch(`/api/flights?date=${startDate}&origin=${originCity}&destination=${destCity}`);
       const data = await res.json();
       if (onSearchResults) {
-        onSearchResults(data.flights, destinations, startDate);
+        onSearchResults(data.flights, destinations, startDate, endDate);
       } else {
-        alert(`Found ${data.flights?.length || 0} flight options from ${originCity} to ${destCity} on ${startDate}!`);
+        alert(`Found ${data.flights?.length || 0} flight options from ${originCity} to ${destCity} (${startDate} to ${endDate})!`);
       }
     } catch (e) {
       console.error(e);
@@ -134,13 +135,25 @@ export default function SearchBar({ onSearchResults }) {
 
         <div className={styles.searchFields}>
           <div className={styles.fieldGroup}>
-            <span className={styles.fieldLabel}>Dates</span>
+            <span className={styles.fieldLabel}>From</span>
             <input
               type="date"
               className={styles.fieldInput}
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              id="date-picker-input"
+              id="date-start-input"
+            />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <span className={styles.fieldLabel}>To</span>
+            <input
+              type="date"
+              className={styles.fieldInput}
+              value={endDate}
+              min={startDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              id="date-end-input"
             />
           </div>
 

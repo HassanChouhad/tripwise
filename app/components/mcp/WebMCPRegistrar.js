@@ -123,6 +123,36 @@ const mcpTools = [
       required: ["trip_id", "name", "destinations"]
     },
     annotations: { readOnlyHint: false }
+  },
+  {
+    name: "add_to_cart",
+    description: "Add a saved trip to the shopping cart for checkout and payment.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        trip_id: { type: "string", description: "The trip ID to add to cart" },
+        name: { type: "string", description: "Trip name" },
+        destinations: { type: "array", items: { type: "string" }, description: "Destination cities" },
+        start_date: { type: "string", description: "Trip start date" },
+        end_date: { type: "string", description: "Trip end date" },
+        travelers: { type: "number", description: "Number of travelers" },
+        cost: { type: "number", description: "Total cost of the trip" }
+      },
+      required: ["trip_id", "name"]
+    },
+    annotations: { readOnlyHint: false }
+  },
+  {
+    name: "get_travel_guide",
+    description: "Get airport-to-city transport options and places to visit for a destination city. Use after booking confirmation to help travelers plan their arrival and sightseeing.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        city: { type: "string", description: "Destination city name (e.g. Tokyo, Paris, London)" }
+      },
+      required: ["city"]
+    },
+    annotations: { readOnlyHint: true }
   }
 ];
 
@@ -148,6 +178,32 @@ export default function WebMCPRegistrar() {
         trips.unshift(trip);
         localStorage.setItem('tripwise_saved_trips', JSON.stringify(trips));
         return { result: { message: `Trip "${trip.name}" saved successfully`, trip } };
+      }
+      if (name === 'add_to_cart') {
+        const item = {
+          id: params.trip_id || `trip_${Date.now()}`,
+          name: params.name || 'Trip',
+          destinations: params.destinations || [],
+          start_date: params.start_date,
+          end_date: params.end_date,
+          travelers: params.travelers || 1,
+          quantity: params.travelers || 1,
+          cost: params.cost || 0
+        };
+        const stored = localStorage.getItem('tripwise_cart');
+        const cart = stored ? JSON.parse(stored) : [];
+        if (cart.find(c => c.id === item.id)) {
+          return { result: { message: `Trip "${item.name}" is already in the cart` } };
+        }
+        cart.push(item);
+        localStorage.setItem('tripwise_cart', JSON.stringify(cart));
+        return { result: { message: `Trip "${item.name}" added to cart`, cart_count: cart.length } };
+      }
+      if (name === 'get_travel_guide') {
+        const { default: travelData } = await import('../../data/travel-guide.json');
+        const cityData = travelData[params.city];
+        if (!cityData) return { result: { error: `No travel guide available for ${params.city}` } };
+        return { result: cityData };
       }
       try {
         const res = await fetch('/api/mcp', {

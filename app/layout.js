@@ -4,6 +4,7 @@ import WebMCPRegistrar from './components/mcp/WebMCPRegistrar';
 import ClientOnly from './components/layout/ClientOnly';
 import { SavedTripsProvider } from './context/SavedTripsContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { CartProvider } from './context/CartContext';
 
 export const metadata = {
   title: 'TripWise — AI-Powered Travel Planner',
@@ -15,17 +16,19 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ThemeProvider>
-          <SavedTripsProvider>
-            <WebMCPRegistrar />
-            <div className="app-layout">
-              <ClientOnly>
-                <Sidebar />
-              </ClientOnly>
-              <main className="main-content">
-                {children}
-              </main>
-            </div>
-          </SavedTripsProvider>
+          <CartProvider>
+            <SavedTripsProvider>
+              <WebMCPRegistrar />
+              <div className="app-layout">
+                <ClientOnly>
+                  <Sidebar />
+                </ClientOnly>
+                <main className="main-content">
+                  {children}
+                </main>
+              </div>
+            </SavedTripsProvider>
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

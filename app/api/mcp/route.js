@@ -193,6 +193,13 @@ export async function POST(req) {
       });
     }
 
+    if (tool === 'get_travel_guide') {
+      const travelData = (await import('@/app/data/travel-guide.json')).default;
+      const cityData = travelData[params?.city];
+      if (!cityData) return NextResponse.json({ error: `No travel guide for ${params?.city}` }, { status: 404 });
+      return NextResponse.json({ result: cityData });
+    }
+
     return NextResponse.json({ error: "Tool not found" }, { status: 404 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
