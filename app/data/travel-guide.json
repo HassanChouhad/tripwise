@@ -1,6 +1,9 @@
 {
   "Tokyo": {
     "airport": "Narita International Airport (NRT)",
+    "airportCoords": [35.7647, 140.3864],
+    "cityCenter": [35.6812, 139.7671],
+    "cityCenterName": "Tokyo Station",
     "transport": [
       { "mode": "Narita Express (N'EX)", "duration": "60 min", "cost": "€25", "description": "Direct train to Tokyo Station and Shinjuku. Comfortable and reliable." },
       { "mode": "Limousine Bus", "duration": "85 min", "cost": "€22", "description": "Door-to-door bus service to major hotels in Shinjuku, Shibuya, and Ikebukuro." },
@@ -9,18 +12,21 @@
       { "mode": "Taxi / Private Transfer", "duration": "60-90 min", "cost": "€180-250", "description": "Direct door-to-door but expensive. Best for groups." }
     ],
     "places": [
-      { "name": "Senso-ji Temple", "type": "Temple", "description": "Tokyo's oldest temple in Asakusa with the iconic Thunder Gate." },
-      { "name": "Shibuya Crossing", "type": "Landmark", "description": "The world's busiest pedestrian crossing, iconic Tokyo experience." },
-      { "name": "Meiji Shrine", "type": "Shrine", "description": "Serene Shinto shrine surrounded by forest in central Tokyo." },
-      { "name": "Akihabara Electric Town", "type": "Shopping", "description": "Electronics, anime, and gaming district." },
-      { "name": "Tsukiji Outer Market", "type": "Food", "description": "Fresh sushi, street food, and culinary delights." },
-      { "name": "Tokyo Skytree", "type": "Viewpoint", "description": "634m tower with observation decks and panoramic city views." },
-      { "name": "Shinjuku Gyoen", "type": "Park", "description": "Beautiful garden blending Japanese, English, and French landscapes." },
-      { "name": "Harajuku & Takeshita Street", "type": "Culture", "description": "Youth fashion, crepes, and unique street culture." }
+      { "name": "Senso-ji Temple", "type": "Temple", "description": "Tokyo's oldest temple in Asakusa with the iconic Thunder Gate.", "coords": [35.7148, 139.7967] },
+      { "name": "Shibuya Crossing", "type": "Landmark", "description": "The world's busiest pedestrian crossing, iconic Tokyo experience.", "coords": [35.6595, 139.7004] },
+      { "name": "Meiji Shrine", "type": "Shrine", "description": "Serene Shinto shrine surrounded by forest in central Tokyo.", "coords": [35.6764, 139.6993] },
+      { "name": "Akihabara Electric Town", "type": "Shopping", "description": "Electronics, anime, and gaming district.", "coords": [35.7023, 139.7745] },
+      { "name": "Tsukiji Outer Market", "type": "Food", "description": "Fresh sushi, street food, and culinary delights.", "coords": [35.6654, 139.7707] },
+      { "name": "Tokyo Skytree", "type": "Viewpoint", "description": "634m tower with observation decks and panoramic city views.", "coords": [35.7101, 139.8107] },
+      { "name": "Shinjuku Gyoen", "type": "Park", "description": "Beautiful garden blending Japanese, English, and French landscapes.", "coords": [35.6852, 139.7100] },
+      { "name": "Harajuku & Takeshita Street", "type": "Culture", "description": "Youth fashion, crepes, and unique street culture.", "coords": [35.6702, 139.7026] }
     ]
   },
   "Kyoto": {
     "airport": "Kansai International Airport (KIX)",
+    "airportCoords": [34.4347, 135.2440],
+    "cityCenter": [34.9858, 135.7588],
+    "cityCenterName": "Kyoto Station",
     "transport": [
       { "mode": "Haruka Express", "duration": "75 min", "cost": "€28", "description": "Direct JR limited express train from KIX to Kyoto Station." },
       { "mode": "Airport Bus (MK Shuttle)", "duration": "90 min", "cost": "€30", "description": "Shared shuttle direct to Kyoto hotels." },
@@ -28,17 +34,20 @@
       { "mode": "Taxi / Private Transfer", "duration": "90 min", "cost": "€200-280", "description": "Direct transfer, convenient for groups with luggage." }
     ],
     "places": [
-      { "name": "Fushimi Inari Shrine", "type": "Shrine", "description": "Thousands of vermillion torii gates climbing a mountain." },
-      { "name": "Kinkaku-ji (Golden Pavilion)", "type": "Temple", "description": "Stunning gold-leaf covered temple reflected in a mirror pond." },
-      { "name": "Arashiyama Bamboo Grove", "type": "Nature", "description": "Towering bamboo stalks creating an otherworldly pathway." },
-      { "name": "Gion District", "type": "Culture", "description": "Historic geisha district with traditional wooden machiya houses." },
-      { "name": "Kiyomizu-dera", "type": "Temple", "description": "Wooden temple on a hillside with panoramic views of Kyoto." },
-      { "name": "Nishiki Market", "type": "Food", "description": "Five blocks of food stalls, fresh produce, and Kyoto specialties." },
-      { "name": "Philosopher's Path", "type": "Walk", "description": "Stone canal-side path connecting temples, stunning in autumn." }
+      { "name": "Fushimi Inari Shrine", "type": "Shrine", "description": "Thousands of vermillion torii gates climbing a mountain.", "coords": [34.9671, 135.7727] },
+      { "name": "Kinkaku-ji (Golden Pavilion)", "type": "Temple", "description": "Stunning gold-leaf covered temple reflected in a mirror pond.", "coords": [35.0394, 135.7292] },
+      { "name": "Arashiyama Bamboo Grove", "type": "Nature", "description": "Towering bamboo stalks creating an otherworldly pathway.", "coords": [35.0094, 135.6722] },
+      { "name": "Gion District", "type": "Culture", "description": "Historic geisha district with traditional wooden machiya houses.", "coords": [35.0036, 135.7747] },
+      { "name": "Kiyomizu-dera", "type": "Temple", "description": "Wooden temple on a hillside with panoramic views of Kyoto.", "coords": [34.9949, 135.7850] },
+      { "name": "Nishiki Market", "type": "Food", "description": "Five blocks of food stalls, fresh produce, and Kyoto specialties.", "coords": [35.0050, 135.7649] },
+      { "name": "Philosopher's Path", "type": "Walk", "description": "Stone canal-side path connecting temples, stunning in autumn.", "coords": [35.0272, 135.7940] }
     ]
   },
   "Osaka": {
     "airport": "Kansai International Airport (KIX)",
+    "airportCoords": [34.4347, 135.2440],
+    "cityCenter": [34.6937, 135.5023],
+    "cityCenterName": "Namba Station",
     "transport": [
       { "mode": "Nankai Rapi:t", "duration": "35 min", "cost": "€12", "description": "Express train to Namba station. Fastest option." },
       { "mode": "JR Haruka (to Tennoji)", "duration": "50 min", "cost": "€18", "description": "JR limited express, convenient for south Osaka hotels." },
@@ -46,16 +55,19 @@
       { "mode": "Taxi / Private Transfer", "duration": "45 min", "cost": "€150-200", "description": "Direct door-to-door service." }
     ],
     "places": [
-      { "name": "Osaka Castle", "type": "Landmark", "description": "Iconic castle with museum and surrounding park." },
-      { "name": "Dotonbori", "type": "Food & Entertainment", "description": "Neon-lit street food paradise along the canal." },
-      { "name": "Shinsekai", "type": "Culture", "description": "Retro neighborhood with Tsutenkaku Tower and kushikatsu restaurants." },
-      { "name": "Kuromon Market", "type": "Food", "description": "Fresh seafood, wagyu beef, and street food market." },
-      { "name": "Universal Studios Japan", "type": "Theme Park", "description": "Major theme park with Super Nintendo World." },
-      { "name": "Sumiyoshi Taisha", "type": "Shrine", "description": "One of Japan's oldest shrines with unique architectural style." }
+      { "name": "Osaka Castle", "type": "Landmark", "description": "Iconic castle with museum and surrounding park.", "coords": [34.6873, 135.5262] },
+      { "name": "Dotonbori", "type": "Food & Entertainment", "description": "Neon-lit street food paradise along the canal.", "coords": [34.6687, 135.5013] },
+      { "name": "Shinsekai", "type": "Culture", "description": "Retro neighborhood with Tsutenkaku Tower and kushikatsu restaurants.", "coords": [34.6523, 135.5062] },
+      { "name": "Kuromon Market", "type": "Food", "description": "Fresh seafood, wagyu beef, and street food market.", "coords": [34.6691, 135.5070] },
+      { "name": "Universal Studios Japan", "type": "Theme Park", "description": "Major theme park with Super Nintendo World.", "coords": [34.6654, 135.4323] },
+      { "name": "Sumiyoshi Taisha", "type": "Shrine", "description": "One of Japan's oldest shrines with unique architectural style.", "coords": [34.6128, 135.4929] }
     ]
   },
   "Paris": {
     "airport": "Charles de Gaulle Airport (CDG)",
+    "airportCoords": [49.0097, 2.5479],
+    "cityCenter": [48.8566, 2.3522],
+    "cityCenterName": "Chatelet-Les Halles",
     "transport": [
       { "mode": "RER B Train", "duration": "35 min", "cost": "€11", "description": "Direct train to Gare du Nord, Chatelet, and central Paris." },
       { "mode": "Roissybus", "duration": "60 min", "cost": "€14", "description": "Direct bus to Opera Garnier in central Paris." },
@@ -64,16 +76,19 @@
       { "mode": "Private Transfer", "duration": "45 min", "cost": "€70-90", "description": "Pre-booked sedan with meet & greet at arrivals." }
     ],
     "places": [
-      { "name": "Eiffel Tower", "type": "Landmark", "description": "Iconic iron tower with observation decks and restaurants." },
-      { "name": "Louvre Museum", "type": "Museum", "description": "World's largest art museum, home to the Mona Lisa." },
-      { "name": "Montmartre & Sacre-Coeur", "type": "Neighborhood", "description": "Hilltop artistic village with stunning basilica views." },
-      { "name": "Notre-Dame Cathedral", "type": "Landmark", "description": "Gothic masterpiece on Ile de la Cite (restored)." },
-      { "name": "Champs-Elysees & Arc de Triomphe", "type": "Shopping", "description": "Iconic avenue with luxury shops and the triumphal arch." },
-      { "name": "Le Marais", "type": "Neighborhood", "description": "Trendy district with galleries, cafes, and falafel." }
+      { "name": "Eiffel Tower", "type": "Landmark", "description": "Iconic iron tower with observation decks and restaurants.", "coords": [48.8584, 2.2945] },
+      { "name": "Louvre Museum", "type": "Museum", "description": "World's largest art museum, home to the Mona Lisa.", "coords": [48.8606, 2.3376] },
+      { "name": "Montmartre & Sacre-Coeur", "type": "Neighborhood", "description": "Hilltop artistic village with stunning basilica views.", "coords": [48.8867, 2.3431] },
+      { "name": "Notre-Dame Cathedral", "type": "Landmark", "description": "Gothic masterpiece on Ile de la Cite (restored).", "coords": [48.8530, 2.3499] },
+      { "name": "Champs-Elysees & Arc de Triomphe", "type": "Shopping", "description": "Iconic avenue with luxury shops and the triumphal arch.", "coords": [48.8738, 2.2950] },
+      { "name": "Le Marais", "type": "Neighborhood", "description": "Trendy district with galleries, cafes, and falafel.", "coords": [48.8593, 2.3622] }
     ]
   },
   "London": {
     "airport": "Heathrow Airport (LHR)",
+    "airportCoords": [51.4700, -0.4543],
+    "cityCenter": [51.5074, -0.1278],
+    "cityCenterName": "Central London (Paddington)",
     "transport": [
       { "mode": "Heathrow Express", "duration": "15 min", "cost": "€28", "description": "Non-stop train to Paddington Station." },
       { "mode": "Elizabeth Line (TfL)", "duration": "30-40 min", "cost": "€12", "description": "Direct tube connection to central London stations." },
@@ -82,16 +97,19 @@
       { "mode": "Black Cab / Uber", "duration": "40-60 min", "cost": "€60-90", "description": "Door-to-door, metered fare depending on traffic." }
     ],
     "places": [
-      { "name": "British Museum", "type": "Museum", "description": "World history collection including the Rosetta Stone. Free entry." },
-      { "name": "Tower of London", "type": "Landmark", "description": "Historic castle housing the Crown Jewels." },
-      { "name": "Borough Market", "type": "Food", "description": "London's oldest food market with international cuisines." },
-      { "name": "Westminster & Big Ben", "type": "Landmark", "description": "Parliament, Westminster Abbey, and the iconic clock tower." },
-      { "name": "Camden Market", "type": "Shopping", "description": "Eclectic market with street food, vintage fashion, and live music." },
-      { "name": "Hyde Park", "type": "Park", "description": "Royal park with Serpentine lake and Speaker's Corner." }
+      { "name": "British Museum", "type": "Museum", "description": "World history collection including the Rosetta Stone. Free entry.", "coords": [51.5194, -0.1270] },
+      { "name": "Tower of London", "type": "Landmark", "description": "Historic castle housing the Crown Jewels.", "coords": [51.5081, -0.0759] },
+      { "name": "Borough Market", "type": "Food", "description": "London's oldest food market with international cuisines.", "coords": [51.5055, -0.0910] },
+      { "name": "Westminster & Big Ben", "type": "Landmark", "description": "Parliament, Westminster Abbey, and the iconic clock tower.", "coords": [51.5007, -0.1246] },
+      { "name": "Camden Market", "type": "Shopping", "description": "Eclectic market with street food, vintage fashion, and live music.", "coords": [51.5414, -0.1462] },
+      { "name": "Hyde Park", "type": "Park", "description": "Royal park with Serpentine lake and Speaker's Corner.", "coords": [51.5073, -0.1657] }
     ]
   },
   "Rome": {
     "airport": "Fiumicino Airport (FCO)",
+    "airportCoords": [41.8003, 12.2389],
+    "cityCenter": [41.9009, 12.5013],
+    "cityCenterName": "Roma Termini",
     "transport": [
       { "mode": "Leonardo Express", "duration": "32 min", "cost": "€15", "description": "Non-stop train to Roma Termini station." },
       { "mode": "Regional Train (FL1)", "duration": "45 min", "cost": "€8", "description": "Stops at Trastevere and Ostiense stations." },
@@ -99,28 +117,31 @@
       { "mode": "Taxi (fixed fare)", "duration": "35-50 min", "cost": "€50", "description": "Fixed fare to anywhere within the Aurelian Walls." }
     ],
     "places": [
-      { "name": "Colosseum", "type": "Landmark", "description": "Ancient Roman amphitheater, icon of the Roman Empire." },
-      { "name": "Vatican Museums & Sistine Chapel", "type": "Museum", "description": "Vast art collection and Michelangelo's ceiling masterpiece." },
-      { "name": "Trevi Fountain", "type": "Landmark", "description": "Baroque fountain — toss a coin to ensure your return to Rome." },
-      { "name": "Trastevere", "type": "Neighborhood", "description": "Charming cobblestone streets, trattorias, and nightlife." },
-      { "name": "Pantheon", "type": "Landmark", "description": "Perfectly preserved Roman temple with an open oculus." },
-      { "name": "Roman Forum", "type": "Ruins", "description": "Heart of ancient Rome with temples, arches, and basilicas." }
+      { "name": "Colosseum", "type": "Landmark", "description": "Ancient Roman amphitheater, icon of the Roman Empire.", "coords": [41.8902, 12.4922] },
+      { "name": "Vatican Museums & Sistine Chapel", "type": "Museum", "description": "Vast art collection and Michelangelo's ceiling masterpiece.", "coords": [41.9065, 12.4536] },
+      { "name": "Trevi Fountain", "type": "Landmark", "description": "Baroque fountain — toss a coin to ensure your return to Rome.", "coords": [41.9009, 12.4833] },
+      { "name": "Trastevere", "type": "Neighborhood", "description": "Charming cobblestone streets, trattorias, and nightlife.", "coords": [41.8869, 12.4697] },
+      { "name": "Pantheon", "type": "Landmark", "description": "Perfectly preserved Roman temple with an open oculus.", "coords": [41.8986, 12.4769] },
+      { "name": "Roman Forum", "type": "Ruins", "description": "Heart of ancient Rome with temples, arches, and basilicas.", "coords": [41.8925, 12.4853] }
     ]
   },
   "Marseille": {
     "airport": "Marseille Provence Airport (MRS)",
+    "airportCoords": [43.4393, 5.2214],
+    "cityCenter": [43.2965, 5.3698],
+    "cityCenterName": "Vieux-Port",
     "transport": [
       { "mode": "Navette Aeroport (Shuttle Bus)", "duration": "25 min", "cost": "€10", "description": "Direct bus to Gare Saint-Charles station in city center." },
       { "mode": "Train (Vitrolles)", "duration": "20 min", "cost": "€5", "description": "Short walk to Vitrolles station, then train to Saint-Charles." },
       { "mode": "Taxi", "duration": "25-35 min", "cost": "€50-60", "description": "Direct to any hotel in central Marseille." }
     ],
     "places": [
-      { "name": "Vieux-Port (Old Port)", "type": "Harbor", "description": "Historic harbor with fish market, cafes, and boat tours." },
-      { "name": "Notre-Dame de la Garde", "type": "Basilica", "description": "Hilltop basilica with panoramic views of the city and sea." },
-      { "name": "Calanques National Park", "type": "Nature", "description": "Stunning limestone cliffs and turquoise coves for hiking and swimming." },
-      { "name": "Le Panier", "type": "Neighborhood", "description": "Oldest quarter with street art, artisan shops, and cafes." },
-      { "name": "MuCEM", "type": "Museum", "description": "Museum of European and Mediterranean Civilisations with rooftop views." },
-      { "name": "Chateau d'If", "type": "Landmark", "description": "Island fortress from The Count of Monte Cristo, boat ride from port." }
+      { "name": "Vieux-Port (Old Port)", "type": "Harbor", "description": "Historic harbor with fish market, cafes, and boat tours.", "coords": [43.2951, 5.3745] },
+      { "name": "Notre-Dame de la Garde", "type": "Basilica", "description": "Hilltop basilica with panoramic views of the city and sea.", "coords": [43.2838, 5.3714] },
+      { "name": "Calanques National Park", "type": "Nature", "description": "Stunning limestone cliffs and turquoise coves for hiking and swimming.", "coords": [43.2120, 5.4370] },
+      { "name": "Le Panier", "type": "Neighborhood", "description": "Oldest quarter with street art, artisan shops, and cafes.", "coords": [43.2990, 5.3665] },
+      { "name": "MuCEM", "type": "Museum", "description": "Museum of European and Mediterranean Civilisations with rooftop views.", "coords": [43.2967, 5.3607] },
+      { "name": "Chateau d'If", "type": "Landmark", "description": "Island fortress from The Count of Monte Cristo, boat ride from port.", "coords": [43.2800, 5.3250] }
     ]
   }
 }

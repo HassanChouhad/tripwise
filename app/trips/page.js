@@ -3,6 +3,7 @@
 import { useSavedTrips } from '../context/SavedTripsContext';
 import { useCart } from '../context/CartContext';
 import ItineraryTimeline from '../components/itinerary/ItineraryTimeline';
+import TravelGuide from '../components/travel/TravelGuide';
 import { ShoppingCart } from 'lucide-react';
 
 export default function TripsPage() {
@@ -15,7 +16,7 @@ export default function TripsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
       <div>
         <h1 className="text-display">My Saved Trips</h1>
-        <p className="text-caption">Access your saved itineraries, confirmed flight bookings, and routes.</p>
+        <p className="text-caption">Access your saved itineraries, transport options, and places to visit.</p>
       </div>
 
       {savedTrips.length === 0 ? (
@@ -27,8 +28,8 @@ export default function TripsPage() {
         </div>
       ) : (
         savedTrips.map((trip) => {
-          const legs = trip.legs || trip.flights || [];
           const inCart = isInCart(trip.id);
+          const destinations = (trip.destinations || []).map(d => typeof d === 'string' ? d : d.name);
           return (
             <div key={trip.id} style={{ marginBottom: 'var(--space-6)', position: 'relative' }}>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)', marginBottom: '8px' }}>
@@ -68,7 +69,13 @@ export default function TripsPage() {
                   🗑️ Delete
                 </button>
               </div>
-              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
+              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: destinations.map(d => ({ name: d })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
+
+              {destinations.length > 0 && (
+                <div style={{ marginTop: 'var(--space-6)' }}>
+                  <TravelGuide destinations={destinations} flights={trip.flights || trip.legs || []} />
+                </div>
+              )}
             </div>
           );
         })
