@@ -194,6 +194,16 @@
   border-color: var(--color-border-light);
 }
 
+.fieldInput input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.fieldInput input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
 .searchBtn {
   display: flex;
   align-items: center;

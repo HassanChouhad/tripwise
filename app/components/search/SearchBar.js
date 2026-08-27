@@ -151,31 +151,35 @@ export default function SearchBar({ onSearchResults }) {
         <div className={styles.searchFields}>
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>From</span>
-            <input
-              type="date"
-              className={styles.fieldInput}
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              id="date-start-input"
-            />
+            <div className={styles.fieldInput}>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                id="date-start-input"
+                style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: '500', outline: 'none', cursor: 'pointer', flex: 1 }}
+              />
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>To</span>
-            <input
-              type="date"
-              className={styles.fieldInput}
-              value={endDate}
-              min={startDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              id="date-end-input"
-            />
+            <div className={styles.fieldInput}>
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                id="date-end-input"
+                style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: '500', outline: 'none', cursor: 'pointer', flex: 1 }}
+              />
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>Travelers</span>
             <div className={styles.fieldInput}>
-              <Users size={16} />
+              <Users size={16} style={{ flexShrink: 0 }} />
               <select
                 value={travelers}
                 onChange={(e) => setTravelers(Number(e.target.value))}
