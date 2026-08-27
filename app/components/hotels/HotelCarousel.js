@@ -6,6 +6,44 @@ import hotelData from '../../data/hotels.json';
 import { useSavedTrips } from '../../context/SavedTripsContext';
 import styles from './HotelCarousel.module.css';
 
+const cityHotelImages = {
+  'Tokyo': [
+    'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=400&h=250&fit=crop',
+  ],
+  'Kyoto': [
+    'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=250&fit=crop',
+  ],
+  'Osaka': [
+    'https://images.unsplash.com/photo-1590559899731-a382839e5549?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1583416750470-965b2707b355?w=400&h=250&fit=crop',
+  ],
+  'Paris': [
+    'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&h=250&fit=crop',
+  ],
+  'London': [
+    'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=400&h=250&fit=crop',
+  ],
+  'Rome': [
+    'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1529260830199-42c24126f198?w=400&h=250&fit=crop',
+  ],
+  'Marseille': [
+    'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=400&h=250&fit=crop',
+    'https://images.unsplash.com/photo-1600267185393-e158a98703de?w=400&h=250&fit=crop',
+  ],
+};
+
+function getHotelImage(hotel, index) {
+  if (hotel.image && hotel.image.startsWith('http')) return hotel.image;
+  const images = cityHotelImages[hotel.city];
+  if (images) return images[index % images.length];
+  return null;
+}
+
 export default function HotelCarousel({ searchResults }) {
   const [hotels, setHotels] = useState(hotelData.hotels);
   const [addedHotels, setAddedHotels] = useState({});
@@ -64,13 +102,17 @@ export default function HotelCarousel({ searchResults }) {
       </div>
 
       <div className={styles.grid}>
-        {hotels.map((hotel) => (
+        {hotels.map((hotel, index) => (
           <div key={hotel.id} className={styles.card}>
             <div className={styles.imageWrapper}>
-              <div className={styles.imagePlaceholder}>🏨</div>
+              {getHotelImage(hotel, index) ? (
+                <img src={getHotelImage(hotel, index)} alt={hotel.name} className={styles.imagePlaceholder} />
+              ) : (
+                <div className={styles.imageFallback}>🏨</div>
+              )}
               <div className={styles.badge}>
                 <Star size={12} fill="var(--color-accent-amber)" color="var(--color-accent-amber)" />
-                {hotel.rating}
+                {Number(hotel.rating).toFixed(1)}
               </div>
             </div>
             <div className={styles.content}>

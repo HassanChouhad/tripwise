@@ -16,6 +16,18 @@ const availableCities = [
   "New York, USA (JFK)"
 ];
 
+const cityImages = {
+  'Paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&h=400&fit=crop',
+  'Marseille': 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=1200&h=400&fit=crop',
+  'Tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=400&fit=crop',
+  'Kyoto': 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&h=400&fit=crop',
+  'Osaka': 'https://images.unsplash.com/photo-1590559899731-a382839e5549?w=1200&h=400&fit=crop',
+  'London': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1200&h=400&fit=crop',
+  'Rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1200&h=400&fit=crop',
+  'Bali': 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&h=400&fit=crop',
+  'New York': 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1200&h=400&fit=crop',
+};
+
 const defaultDestinations = [
   { id: 1, name: 'Paris, France (CDG)', isOrigin: true },
   { id: 2, name: 'Tokyo, Japan (NRT)', isOrigin: false },
@@ -73,13 +85,16 @@ export default function SearchBar({ onSearchResults }) {
 
   return (
     <div className={styles.searchSection}>
-      {/* Greeting */}
-      <div className={styles.greeting}>
-        <div className={styles.greetingLeft}>
+      {/* Hero Banner */}
+      <div className={styles.heroBanner}>
+        <img
+          src={cityImages[destinations[1]?.name.split(',')[0]] || cityImages[destinations[0]?.name.split(',')[0]] || cityImages['Tokyo']}
+          alt={destinations[1]?.name || 'Destination'}
+        />
+        <div className={styles.heroBannerOverlay}>
           <h1>Hello, Explorer! 👋</h1>
           <p>Where are you going next?</p>
         </div>
-        <div className={styles.greetingIcon}>🗺️</div>
       </div>
 
       {/* Trip Type Tabs */}
