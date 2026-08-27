@@ -131,7 +131,7 @@ export default function TravelGuide({ destinations, flights }) {
                 Map: Airport → City Center & Places to Visit
               </h3>
             </div>
-            <MapView cityData={cityData} cityName={activeCity} />
+            <MapView key={activeCity} cityData={cityData} cityName={activeCity} />
             <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
               <span>✈ Airport</span>
               <span>🏙 City Center</span>

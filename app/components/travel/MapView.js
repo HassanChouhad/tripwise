@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 const airportIcon = new L.DivIcon({
@@ -25,6 +25,16 @@ const placeIcon = new L.DivIcon({
   iconAnchor: [12, 12]
 });
 
+function FitBounds({ bounds }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+    }
+  }, [map, bounds]);
+  return null;
+}
+
 export default function MapView({ cityData, cityName }) {
   const [mounted, setMounted] = useState(false);
 
@@ -37,7 +47,6 @@ export default function MapView({ cityData, cityName }) {
   const { airportCoords, cityCenter, cityCenterName, places } = cityData;
   if (!airportCoords || !cityCenter) return null;
 
-  const center = cityCenter;
   const routeLine = [airportCoords, cityCenter];
 
   const bounds = L.latLngBounds([airportCoords, cityCenter]);
@@ -50,22 +59,22 @@ export default function MapView({ cityData, cityName }) {
   return (
     <div style={{ borderRadius: 'var(--radius-xl)', overflow: 'hidden', border: '1px solid var(--color-border)', height: '400px' }}>
       <MapContainer
-        bounds={bounds.pad(0.1)}
+        center={cityCenter}
+        zoom={11}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
       >
+        <FitBounds bounds={bounds} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Airport to City Center route */}
         <Polyline
           positions={routeLine}
           pathOptions={{ color: '#7C3AED', weight: 3, dashArray: '8, 8', opacity: 0.8 }}
         />
 
-        {/* Airport marker */}
         <Marker position={airportCoords} icon={airportIcon}>
           <Popup>
             <strong>{cityData.airport}</strong><br />
@@ -73,7 +82,6 @@ export default function MapView({ cityData, cityName }) {
           </Popup>
         </Marker>
 
-        {/* City center marker */}
         <Marker position={cityCenter} icon={cityCenterIcon}>
           <Popup>
             <strong>{cityCenterName}</strong><br />
@@ -81,7 +89,6 @@ export default function MapView({ cityData, cityName }) {
           </Popup>
         </Marker>
 
-        {/* Places to visit */}
         {places && places.map((place, idx) => (
           place.coords && (
             <Marker key={idx} position={place.coords} icon={placeIcon}>
