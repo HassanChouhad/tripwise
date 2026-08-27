@@ -3,14 +3,66 @@
 import { useState } from 'react';
 import { Sparkles, X, Send, Terminal, Loader2 } from 'lucide-react';
 import { useSavedTrips } from '../../context/SavedTripsContext';
+import { useCart } from '../../context/CartContext';
 import styles from './AiPlannerModal.module.css';
 
+const knownCities = ['Paris', 'Marseille', 'Tokyo', 'Kyoto', 'Osaka', 'London', 'Rome', 'Bali', 'New York'];
+
+function parseUserMessage(msg) {
+  const lower = msg.toLowerCase();
+
+  // Extract cities
+  const destinations = knownCities.filter(city => lower.includes(city.toLowerCase()));
+
+  // Extract traveler count
+  const travelerMatch = lower.match(/(\d+)\s*traveler/);
+  const travelers = travelerMatch ? parseInt(travelerMatch[1]) : 1;
+
+  // Extract dates
+  const months = { january: '01', february: '02', march: '03', april: '04', may: '05', june: '06', july: '07', august: '08', september: '09', october: '10', november: '11', december: '12' };
+  let startDate = null;
+  let endDate = null;
+
+  // Try "from DD month" or "DD month" patterns
+  const datePattern = /(\d{1,2})\s*(january|february|march|april|may|june|july|august|september|october|november|december)/gi;
+  const dateMatches = [...msg.matchAll(datePattern)];
+  if (dateMatches.length > 0) {
+    const day = dateMatches[0][1].padStart(2, '0');
+    const month = months[dateMatches[0][2].toLowerCase()];
+    startDate = `2025-${month}-${day}`;
+  }
+
+  // Try "X days" or "X-day"
+  const daysMatch = lower.match(/(\d+)[- ]?days?/);
+  const days = daysMatch ? parseInt(daysMatch[1]) : 10;
+
+  if (startDate) {
+    const end = new Date(startDate);
+    end.setDate(end.getDate() + days);
+    endDate = end.toISOString().split('T')[0];
+  } else {
+    startDate = '2025-10-10';
+    endDate = new Date(new Date(startDate).getTime() + days * 86400000).toISOString().split('T')[0];
+  }
+
+  // Detect intent
+  let intent = 'plan_trip';
+  if (lower.includes('add to cart') || lower.includes('add it to cart') || lower.includes('cart')) {
+    intent = 'add_to_cart';
+  } else if (lower.includes('checkout') || lower.includes('pay') || lower.includes('book it')) {
+    intent = 'checkout';
+  }
+
+  return { destinations, travelers, startDate, endDate, days, intent };
+}
+
 export default function AiPlannerModal({ isOpen, onClose }) {
-  const { saveTrip } = useSavedTrips();
+  const { saveTrip, savedTrips } = useSavedTrips();
+  const { addToCart } = useCart();
   const [messages, setMessages] = useState([
     {
       sender: 'ai',
-      text: 'Hello! I am your WebMCP AI Travel Agent. Tell me your dream trip ideas (e.g. "Plan me a 10-day trip from Paris to Japan visiting Tokyo, Kyoto, and Osaka under €1,200").',
+      text: 'Hello! I am your WebMCP AI Travel Agent. Tell me your dream trip — mention the cities you want to visit, dates, and number of travelers. I can also add trips to your cart or start checkout.',
       toolsUsed: []
     }
   ]);
@@ -38,20 +90,68 @@ export default function AiPlannerModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
+      const parsed = parseUserMessage(userMsg);
+
+      // Handle "add to cart" intent
+      if (parsed.intent === 'add_to_cart') {
+        const latestTrip = savedTrips[0];
+        if (latestTrip) {
+          addToCart(latestTrip);
+          setMessages(prev => [...prev, {
+            sender: 'ai',
+            toolsUsed: ['add_to_cart'],
+            text: `Added "${latestTrip.name}" to your cart! Go to the Cart tab to proceed to checkout.`
+          }]);
+        } else {
+          setMessages(prev => [...prev, {
+            sender: 'ai',
+            toolsUsed: [],
+            text: 'No saved trip found. Plan a trip first, then I can add it to your cart.'
+          }]);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Handle "checkout" intent
+      if (parsed.intent === 'checkout') {
+        setMessages(prev => [...prev, {
+          sender: 'ai',
+          toolsUsed: [],
+          text: 'Head to the Cart tab to review your items and proceed to checkout. You can also navigate directly to /checkout.'
+        }]);
+        setLoading(false);
+        return;
+      }
+
+      // Plan trip intent
       const toolsUsed = [];
 
-      // 1. Create a trip
+      if (parsed.destinations.length === 0) {
+        setMessages(prev => [...prev, {
+          sender: 'ai',
+          toolsUsed: [],
+          text: `I couldn't identify any cities in your message. I know these cities: ${knownCities.join(', ')}. Please mention at least one destination.`
+        }]);
+        setLoading(false);
+        return;
+      }
+
+      const origin = parsed.destinations[0];
+      const destCities = parsed.destinations.length > 1 ? parsed.destinations.slice(1) : parsed.destinations;
+
+      // 1. Create trip
       const trip = await callTool('create_trip', {
-        name: userMsg.slice(0, 50),
-        destinations: ['Tokyo', 'Kyoto', 'Osaka'],
-        start_date: '2025-10-10',
-        end_date: '2025-10-20',
-        travelers: 2
+        name: `Trip to ${destCities.join(', ')}`,
+        destinations: parsed.destinations,
+        start_date: parsed.startDate,
+        end_date: parsed.endDate,
+        travelers: parsed.travelers
       });
       toolsUsed.push('create_trip');
 
-      // 2. Search flights
-      const flights = await callTool('search_flights', { origin: 'Paris' });
+      // 2. Search flights from origin
+      const flights = await callTool('search_flights', { origin });
       toolsUsed.push('search_flights');
 
       // 3. Select best flight
@@ -62,8 +162,9 @@ export default function AiPlannerModal({ isOpen, onClose }) {
         toolsUsed.push('select_flight');
       }
 
-      // 4. Search hotels
-      const hotels = await callTool('search_hotels', { city: 'Tokyo' });
+      // 4. Search hotels in first destination (not origin)
+      const hotelCity = destCities[0] || origin;
+      const hotels = await callTool('search_hotels', { city: hotelCity });
       toolsUsed.push('search_hotels');
 
       // 5. Get hotel details & select
@@ -77,7 +178,7 @@ export default function AiPlannerModal({ isOpen, onClose }) {
       }
 
       // 6. Weather & packing
-      const weather = await callTool('get_weather_and_packing', { cities: ['Tokyo', 'Kyoto', 'Osaka'] });
+      await callTool('get_weather_and_packing', { cities: parsed.destinations });
       toolsUsed.push('get_weather_and_packing');
 
       // 7. Prepare booking
@@ -102,10 +203,10 @@ export default function AiPlannerModal({ isOpen, onClose }) {
 
       const flightInfo = selectedFlight
         ? `${selectedFlight.originCity} → ${selectedFlight.destinationCity} (${selectedFlight.airline}, €${selectedFlight.price})`
-        : 'flights found';
+        : 'No matching flights found in database';
       const hotelInfo = selectedHotel
         ? `${selectedHotel.name} in ${selectedHotel.city} (€${selectedHotel.pricePerNight}/night)`
-        : 'hotels found';
+        : 'No hotels found';
       const totalCost = booking?.cost_breakdown?.total || 'N/A';
 
       setMessages(prev => [
@@ -113,13 +214,13 @@ export default function AiPlannerModal({ isOpen, onClose }) {
         {
           sender: 'ai',
           toolsUsed,
-          text: `Trip planned and saved! Here's what I found for "${userMsg}":\n\n✈️ Flight: ${flightInfo}\n🏨 Hotel: ${hotelInfo}\n🌤️ Weather checked for all destinations — pack a light jacket and comfortable shoes.\n\n💰 Total estimated cost: €${totalCost} for ${trip.travelers} travelers.\n\nBooking ID: ${booking?.booking_id} (${booking?.status})\n\n✅ Trip saved — view it on the Trips page.`
+          text: `Trip planned and saved!\n\n📍 Destinations: ${parsed.destinations.join(' → ')}\n📅 Dates: ${parsed.startDate} to ${parsed.endDate} (${parsed.days} days)\n👥 Travelers: ${parsed.travelers}\n\n✈️ Flight: ${flightInfo}\n🏨 Hotel: ${hotelInfo}\n🌤️ Weather checked — pack accordingly.\n\n💰 Total: €${totalCost}\n\n✅ Trip saved — say "add to cart" to proceed to checkout.`
         }
       ]);
     } catch (err) {
       setMessages(prev => [
         ...prev,
-        { sender: 'ai', text: 'Sorry, I ran into an issue connecting to WebMCP tools.' }
+        { sender: 'ai', text: `Sorry, something went wrong: ${err.message}` }
       ]);
     } finally {
       setLoading(false);
@@ -155,7 +256,7 @@ export default function AiPlannerModal({ isOpen, onClose }) {
                     WebMCP Invoked: {msg.toolsUsed.join(', ')}
                   </div>
                 )}
-                <div className={styles.bubble}>{msg.text}</div>
+                <div className={styles.bubble} style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
               </div>
             </div>
           ))}
