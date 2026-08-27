@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Home, Compass, Map, Plane, Building2, Route, CloudSun,
-  Backpack, Tag, User, Settings, Sparkles, Menu, X, Sun, Moon
+  Backpack, Tag, User, Settings, Sparkles, Menu, X, Sun, Moon, ShoppingCart
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
 import styles from './Sidebar.module.css';
 import AiPlannerModal from '../ai/AiPlannerModal';
 
@@ -22,6 +23,7 @@ const navItems = [
   { icon: CloudSun, label: 'Weather', href: '/weather' },
   { icon: Backpack, label: 'Packing Guide', href: '/packing' },
   { icon: Tag, label: 'Deals', href: '/deals' },
+  { icon: ShoppingCart, label: 'Cart', href: '/cart' },
   { divider: true },
   { icon: User, label: 'Account', href: '/account' },
   { icon: Settings, label: 'Settings', href: '/settings' },
@@ -32,6 +34,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { cartCount } = useCart();
 
   return (
     <>
@@ -80,6 +83,9 @@ export default function Sidebar() {
               >
                 <Icon className={styles.navIcon} size={20} />
                 <span>{item.label}</span>
+                {item.label === 'Cart' && cartCount > 0 && (
+                  <span className={styles.cartBadge}>{cartCount}</span>
+                )}
               </Link>
             );
           })}

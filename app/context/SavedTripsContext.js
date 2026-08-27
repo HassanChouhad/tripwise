@@ -1,41 +1,49 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const SavedTripsContext = createContext();
 
 export function SavedTripsProvider({ children }) {
   const [savedTrips, setSavedTrips] = useState([]);
   const [isHydrated, setIsHydrated] = useState(false);
+  const hydrated = useRef(false);
 
   useEffect(() => {
-    setIsHydrated(true);
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('tripwise_saved_trips');
-      if (stored) {
-        try { setSavedTrips(JSON.parse(stored)); } catch (e) {}
-      }
+    const stored = localStorage.getItem('tripwise_saved_trips');
+    if (stored) {
+      try { setSavedTrips(JSON.parse(stored)); } catch (e) {}
     }
+    hydrated.current = true;
+    setIsHydrated(true);
   }, []);
 
   const saveTrip = (trip) => {
-    const updated = [trip, ...savedTrips];
-    setSavedTrips(updated);
-    if (typeof window !== 'undefined') {
+    setSavedTrips(prev => {
+      const updated = [trip, ...prev];
       localStorage.setItem('tripwise_saved_trips', JSON.stringify(updated));
-    }
+      return updated;
+    });
+  };
+
+  const updateTrip = (updatedTrip) => {
+    setSavedTrips(prev => {
+      const updated = prev.map(t => t.id === updatedTrip.id ? updatedTrip : t);
+      localStorage.setItem('tripwise_saved_trips', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const deleteTrip = (id) => {
-    const updated = savedTrips.filter(t => t.id !== id);
-    setSavedTrips(updated);
-    if (typeof window !== 'undefined') {
+    setSavedTrips(prev => {
+      const updated = prev.filter(t => t.id !== id);
       localStorage.setItem('tripwise_saved_trips', JSON.stringify(updated));
-    }
+      return updated;
+    });
   };
 
   return (
-    <SavedTripsContext.Provider value={{ savedTrips, saveTrip, deleteTrip }}>
+    <SavedTripsContext.Provider value={{ savedTrips, saveTrip, updateTrip, deleteTrip, isHydrated }}>
       {children}
     </SavedTripsContext.Provider>
   );

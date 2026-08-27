@@ -1,10 +1,15 @@
 'use client';
 
 import { useSavedTrips } from '../context/SavedTripsContext';
+import { useCart } from '../context/CartContext';
 import ItineraryTimeline from '../components/itinerary/ItineraryTimeline';
+import { ShoppingCart } from 'lucide-react';
 
 export default function TripsPage() {
   const { savedTrips, deleteTrip } = useSavedTrips();
+  const { addToCart, cart } = useCart();
+
+  const isInCart = (tripId) => cart.some(item => item.id === tripId);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
@@ -23,14 +28,35 @@ export default function TripsPage() {
       ) : (
         savedTrips.map((trip) => {
           const legs = trip.legs || trip.flights || [];
+          const inCart = isInCart(trip.id);
           return (
             <div key={trip.id} style={{ marginBottom: 'var(--space-6)', position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)', marginBottom: '8px' }}>
+                <button
+                  onClick={() => addToCart(trip)}
+                  disabled={inCart}
+                  style={{
+                    background: inCart ? 'rgba(16, 185, 129, 0.15)' : 'rgba(124, 58, 237, 0.1)',
+                    color: inCart ? 'var(--color-accent-green)' : 'var(--color-accent-primary)',
+                    border: `1px solid ${inCart ? 'rgba(16, 185, 129, 0.3)' : 'rgba(124, 58, 237, 0.3)'}`,
+                    padding: '6px 14px',
+                    borderRadius: 'var(--radius-md)',
+                    fontWeight: '600',
+                    cursor: inCart ? 'default' : 'pointer',
+                    fontSize: 'var(--font-size-xs)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <ShoppingCart size={14} />
+                  {inCart ? 'In Cart' : 'Add to Cart'}
+                </button>
                 <button
                   onClick={() => deleteTrip(trip.id)}
                   style={{
                     background: 'rgba(239, 68, 68, 0.15)',
-                    color: 'var(--color-accent-red)',
+                    color: '#EF4444',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                     padding: '6px 14px',
                     borderRadius: 'var(--radius-md)',
@@ -39,10 +65,10 @@ export default function TripsPage() {
                     fontSize: 'var(--font-size-xs)'
                   }}
                 >
-                  🗑️ Delete Trip
+                  🗑️ Delete
                 </button>
               </div>
-              <ItineraryTimeline searchResults={{ flights: legs, destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10' }} />
+              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
             </div>
           );
         })

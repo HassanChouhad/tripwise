@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Sparkles, Bookmark, Heart } from 'lucide-react';
+import { Check, Sparkles, Bookmark } from 'lucide-react';
 import flightData from '../../data/flights.json';
 import { useSavedTrips } from '../../context/SavedTripsContext';
 import styles from './ItineraryTimeline.module.css';
@@ -11,38 +11,90 @@ export default function ItineraryTimeline({ searchResults }) {
   const [saved, setSaved] = useState(false);
 
   const hasDynamic = searchResults && searchResults.flights && searchResults.flights.length > 0;
-  
-  const itinerary = hasDynamic ? {
-    id: `trip-${Date.now()}`,
-    title: `Best Itinerary Found from ${searchResults.destinations[0]?.name.split(',')[0]}`,
-    subtitle: `Optimized for ${searchResults.startDate}`,
-    totalPrice: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
-    pricePerPerson: searchResults.flights.reduce((sum, f) => sum + f.price, 0) || 850,
-    legs: searchResults.destinations.slice(0, -1).map((d, i) => {
-      const flight = searchResults.flights[i] || searchResults.flights[0];
-      const baseDate = new Date(searchResults.startDate || '2025-10-10');
-      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-      return {
-        month: months[baseDate.getUTCMonth()],
-        day: baseDate.getUTCDate() + (i * 3),
-        route: `${d.name.split(',')[0]} → ${searchResults.destinations[i + 1]?.name.split(',')[0]}`,
-        details: `${flight ? flight.airlineCode : 'AF'} 10:30 → 18:45`,
-        airline: flight ? flight.airline : 'Air France',
-        duration: flight ? flight.duration : '8h 15m',
-        stops: flight && flight.stops === 0 ? 'Direct' : '1 stop'
-      };
-    }),
-    includes: [
-      "Flights + Hotels",
-      "Multi-city Itinerary",
-      "24/7 Support"
-    ]
-  } : flightData.bestItinerary;
+
+  // Determine if this is a pre-saved trip (from Trips/Itineraries pages) vs raw API search results
+  const isSavedTrip = hasDynamic && (searchResults.cost != null || searchResults.flights[0]?.route);
+
+  let itinerary;
+
+  if (isSavedTrip) {
+    // Pre-saved trip: flights are [{flight, route, price}]
+    const computedPrice = searchResults.flights.reduce((sum, f) => sum + (f.price || 0), 0);
+    const totalPrice = searchResults.cost || computedPrice;
+    itinerary = {
+      id: `trip-${Date.now()}`,
+      title: `Itinerary: ${(searchResults.destinations || []).map(d => typeof d === 'string' ? d : d.name).join(' → ')}`,
+      subtitle: `Departure: ${searchResults.startDate || 'N/A'}`,
+      totalPrice,
+      pricePerPerson: totalPrice,
+      legs: searchResults.flights.map((f, i) => {
+        const cities = f.route.split(' → ');
+        const baseDate = new Date(searchResults.startDate || '2025-10-10');
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        return {
+          month: months[baseDate.getUTCMonth()],
+          day: baseDate.getUTCDate() + (i * 3),
+          route: f.route,
+          details: `${f.flight || 'Flight'} — €${f.price || 0}`,
+          airline: f.flight || 'Airline',
+          duration: '',
+          stops: ''
+        };
+      }),
+      includes: ["Flights", "Multi-city Itinerary", "24/7 Support"]
+    };
+  } else if (hasDynamic) {
+    // Raw API search results: flights are full DB objects with airlineCode, duration, etc.
+    const totalPrice = searchResults.flights.reduce((sum, f) => sum + (f.price || 0), 0);
+    itinerary = {
+      id: `trip-${Date.now()}`,
+      title: `Best Itinerary Found from ${searchResults.destinations[0]?.name?.split(',')[0] || searchResults.destinations[0]}`,
+      subtitle: `Optimized for ${searchResults.startDate}`,
+      totalPrice,
+      pricePerPerson: totalPrice,
+      legs: searchResults.destinations.slice(0, -1).map((d, i) => {
+        const flight = searchResults.flights[i] || searchResults.flights[0];
+        const baseDate = new Date(searchResults.startDate || '2025-10-10');
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const destName = typeof d === 'string' ? d : (d.name?.split(',')[0] || d.name);
+        const nextDest = searchResults.destinations[i + 1];
+        const nextDestName = typeof nextDest === 'string' ? nextDest : (nextDest?.name?.split(',')[0] || nextDest?.name);
+        return {
+          month: months[baseDate.getUTCMonth()],
+          day: baseDate.getUTCDate() + (i * 3),
+          route: `${destName} → ${nextDestName}`,
+          details: `${flight?.airlineCode || flight?.airline || 'AF'} ${flight?.departureTime || '10:30'} → ${flight?.arrivalTime || '18:45'}`,
+          airline: flight?.airline || 'Air France',
+          duration: flight?.duration || '',
+          stops: flight?.stops === 0 ? 'Direct' : `${flight?.stops || 1} stop`
+        };
+      }),
+      includes: ["Flights + Hotels", "Multi-city Itinerary", "24/7 Support"]
+    };
+  } else {
+    itinerary = flightData.bestItinerary;
+  }
 
   const handleSaveTrip = () => {
-    saveTrip(itinerary);
+    const destinations = hasDynamic
+      ? (searchResults.destinations || []).map(d => typeof d === 'string' ? d : (d.name?.split(',')[0] || d.name))
+      : itinerary.legs.map(l => l.route.split(' → ')[0]);
+    saveTrip({
+      ...itinerary,
+      name: itinerary.title || `Trip to ${destinations.join(', ')}`,
+      destinations,
+      start_date: searchResults?.startDate || '2025-10-10',
+      end_date: searchResults?.endDate || searchResults?.startDate || '2025-10-20',
+      travelers: 1,
+      flights: itinerary.legs.map(l => ({
+        flight: l.airline,
+        route: l.route,
+        price: Math.round(itinerary.totalPrice / (itinerary.legs.length || 1))
+      })),
+      hotels: [],
+      cost: itinerary.totalPrice
+    });
     setSaved(true);
-    alert('🎉 Trip and itinerary saved successfully! You can view it under "Trips", "Flights", and "Itineraries".');
   };
 
   return (
@@ -67,7 +119,6 @@ export default function ItineraryTimeline({ searchResults }) {
       </div>
 
       <div className={styles.contentGrid}>
-        {/* Vertical Timeline */}
         <div className={styles.timelineCard}>
           {itinerary.legs.map((leg, index) => (
             <div key={index} className={styles.timelineItem}>
@@ -82,17 +133,14 @@ export default function ItineraryTimeline({ searchResults }) {
                 <div className={styles.times}>{leg.details}</div>
                 <div className={styles.flightMeta}>
                   <span className={styles.airlineTag}>{leg.airline}</span>
-                  <span>•</span>
-                  <span>{leg.duration}</span>
-                  <span>•</span>
-                  <span>{leg.stops}</span>
+                  {leg.duration && <><span>•</span><span>{leg.duration}</span></>}
+                  {leg.stops && <><span>•</span><span>{leg.stops}</span></>}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Price & Summary Card */}
         <div className={styles.summaryCard}>
           <div className={styles.bestValueBadge}>Best Value</div>
           
@@ -102,7 +150,7 @@ export default function ItineraryTimeline({ searchResults }) {
           </div>
 
           <div className={styles.includesList}>
-            {itinerary.includes.map((item, idx) => (
+            {(itinerary.includes || []).map((item, idx) => (
               <div key={idx} className={styles.includeItem}>
                 <Check size={16} className={styles.includeIcon} />
                 <span>{item}</span>
