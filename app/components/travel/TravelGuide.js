@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Train, Bus, Car, MapPin, Clock, Banknote } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Train, Bus, Car, MapPin, Clock, Banknote, Map } from 'lucide-react';
 import travelData from '../../data/travel-guide.json';
+
+const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 function getTransportIcon(mode) {
   const lower = mode.toLowerCase();
@@ -117,6 +120,23 @@ export default function TravelGuide({ destinations, flights }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Map */}
+          <div style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-xl)', padding: 'var(--space-6)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+              <Map size={18} style={{ color: 'var(--color-accent-primary)' }} />
+              <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 700 }}>
+                Map: Airport → City Center & Places to Visit
+              </h3>
+            </div>
+            <MapView cityData={cityData} cityName={activeCity} />
+            <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-3)', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
+              <span>✈ Airport</span>
+              <span>🏙 City Center</span>
+              <span>📍 Places to visit</span>
+              <span>--- Route to center</span>
             </div>
           </div>
 
