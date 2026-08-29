@@ -30,9 +30,6 @@ const cityImages = {
 
 const defaultDestinations = [
   { id: 1, name: 'Paris, France (CDG)', isOrigin: true },
-  { id: 2, name: 'Tokyo, Japan (NRT)', isOrigin: false },
-  { id: 3, name: 'Kyoto, Japan (KIX)', isOrigin: false },
-  { id: 4, name: 'Osaka, Japan (KIX)', isOrigin: false },
 ];
 
 const tripTypes = ['Round Trip', 'Multi-city', 'One Way'];
@@ -64,7 +61,7 @@ export default function SearchBar({ onSearchResults }) {
 
   const addDestination = () => {
     const newId = Math.max(...destinations.map(d => d.id)) + 1;
-    setDestinations([...destinations, { id: newId, name: 'Marseille, France (MRS)', isOrigin: false }]);
+    setDestinations([...destinations, { id: newId, name: '', isOrigin: false }]);
   };
 
   const handleSearch = async () => {

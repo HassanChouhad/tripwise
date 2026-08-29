@@ -1,0 +1,164 @@
+.container {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+}
+
+.header {
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.originSelector {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.originBtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.originBtn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.originBtnActive {
+  background: rgba(124, 58, 237, 0.15);
+  color: var(--color-accent-primary);
+  border-color: rgba(124, 58, 237, 0.4);
+}
+
+.mapWrapper {
+  height: 420px;
+  position: relative;
+}
+
+.loadingOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--space-3);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.routeList {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  overflow-x: auto;
+  border-top: 1px solid var(--color-border);
+}
+
+.routeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.routeCard:hover {
+  border-color: var(--color-accent-primary);
+  background: rgba(124, 58, 237, 0.08);
+  transform: translateY(-2px);
+}
+
+.routeCity {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.routePrice {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-accent-primary);
+}
+
+.routeCount {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: var(--space-4);
+  }
+
+  .originSelector {
+    width: 100%;
+  }
+
+  .originBtn {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .mapWrapper {
+    height: 300px;
+  }
+
+  .routeList {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .routeCard {
+    min-width: 80px;
+    padding: var(--space-2) var(--space-3);
+  }
+}

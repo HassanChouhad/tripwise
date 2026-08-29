@@ -5,6 +5,7 @@ import SearchBar from './components/search/SearchBar';
 import ItineraryTimeline from './components/itinerary/ItineraryTimeline';
 import WeatherOverview from './components/weather/WeatherOverview';
 import HotelCarousel from './components/hotels/HotelCarousel';
+import FlightMap from './components/map/FlightMap';
 
 export default function Home() {
   const [searchResults, setSearchResults] = useState(null);
@@ -13,9 +14,20 @@ export default function Home() {
     setSearchResults({ flights, destinations, startDate, endDate });
   };
 
+  const handleMapRouteSelect = (origin, destination) => {
+    // Scroll to search bar and let user refine
+    const searchSection = document.getElementById('trip-type-tabs');
+    if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
       <SearchBar onSearchResults={handleSearchResults} />
+
+      <FlightMap
+        startDate={searchResults?.startDate}
+        onSelectRoute={handleMapRouteSelect}
+      />
       
       {searchResults && (
         <div style={{ background: 'var(--color-bg-secondary)', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-accent-primary)' }}>
