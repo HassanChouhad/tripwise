@@ -26,6 +26,7 @@ export default function Home() {
 
       <FlightMap
         startDate={searchResults?.startDate}
+        searchDestinations={searchResults?.destinations}
         onSelectRoute={handleMapRouteSelect}
       />
       

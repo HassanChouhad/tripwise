@@ -65,15 +65,30 @@ export default function SearchBar({ onSearchResults }) {
   };
 
   const handleSearch = async () => {
-    const originCity = destinations[0]?.name.split(',')[0] || 'Paris';
-    const destCity = destinations[1]?.name.split(',')[0] || 'Tokyo';
+    const nonEmptyDests = destinations.filter(d => d.name.trim());
+    if (nonEmptyDests.length < 2) {
+      alert('Please add at least one destination.');
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/flights?date=${startDate}&origin=${originCity}&destination=${destCity}`);
-      const data = await res.json();
+      const allFlights = [];
+
+      // Fetch flights for each consecutive leg
+      for (let i = 0; i < nonEmptyDests.length - 1; i++) {
+        const originCity = nonEmptyDests[i].name.split(',')[0].trim();
+        const destCity = nonEmptyDests[i + 1].name.split(',')[0].trim();
+        const res = await fetch(`/api/flights?date=${startDate}&origin=${originCity}&destination=${destCity}`);
+        const data = await res.json();
+        if (data.flights && data.flights.length > 0) {
+          allFlights.push(...data.flights);
+        }
+      }
+
       if (onSearchResults) {
-        onSearchResults(data.flights, destinations, startDate, endDate);
+        onSearchResults(allFlights, nonEmptyDests, startDate, endDate);
       } else {
-        alert(`Found ${data.flights?.length || 0} flight options from ${originCity} to ${destCity} (${startDate} to ${endDate})!`);
+        alert(`Found ${allFlights.length} flight options across ${nonEmptyDests.length - 1} leg(s).`);
       }
     } catch (e) {
       console.error(e);

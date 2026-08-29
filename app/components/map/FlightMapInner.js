@@ -4,45 +4,46 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-function createCityIcon(color, label) {
+function createPriceBubble(city, price, isSelected) {
+  const bg = isSelected ? '#7C3AED' : '#1a73e8';
   return new L.DivIcon({
     className: '',
     html: `<div style="
-      background:${color};color:white;
-      min-width:24px;height:24px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-size:11px;font-weight:700;
-      box-shadow:0 2px 8px rgba(0,0,0,0.3);
-      border:2px solid rgba(255,255,255,0.8);
-    ">${label}</div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
-  });
-}
-
-function createPriceLabel(price) {
-  return new L.DivIcon({
-    className: '',
-    html: `<div style="
-      background:rgba(124,58,237,0.9);color:white;
-      padding:2px 8px;border-radius:10px;
-      font-size:11px;font-weight:700;
+      background:${bg};color:white;
+      padding:4px 10px;border-radius:16px;
+      font-size:12px;font-weight:700;
       white-space:nowrap;
-      box-shadow:0 2px 6px rgba(0,0,0,0.2);
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      cursor:pointer;
+      display:flex;align-items:center;gap:4px;
+      border:2px solid rgba(255,255,255,0.9);
+      transition:transform 0.15s;
     ">€${Math.round(price)}</div>`,
-    iconSize: [60, 20],
-    iconAnchor: [30, 10]
+    iconSize: [70, 28],
+    iconAnchor: [35, 14]
   });
 }
 
-const originIcon = createCityIcon('#7C3AED', '✈');
+function createOriginIcon() {
+  return new L.DivIcon({
+    className: '',
+    html: `<div style="
+      background:#EF4444;color:white;
+      width:12px;height:12px;border-radius:50%;
+      box-shadow:0 0 0 4px rgba(239,68,68,0.3), 0 2px 6px rgba(0,0,0,0.3);
+      border:2px solid white;
+    "></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+}
 
 function getCurvePoints(from, to, numPoints = 30) {
   const points = [];
   const lngDiff = to[1] - from[1];
   const latDiff = to[0] - from[0];
   const dist = Math.sqrt(lngDiff * lngDiff + latDiff * latDiff);
-  const curvature = Math.min(dist * 0.2, 15);
+  const curvature = Math.min(dist * 0.15, 10);
 
   for (let i = 0; i <= numPoints; i++) {
     const t = i / numPoints;
@@ -60,13 +61,13 @@ function FitBounds({ bounds }) {
   const map = useMap();
   useEffect(() => {
     if (bounds && bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 5 });
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 });
     }
   }, [map, bounds]);
   return null;
 }
 
-export default function FlightMapInner({ originCity, cityCoords, destinations, onSelectRoute }) {
+export default function FlightMapInner({ originCity, cityCoords, destinations, onSelectRoute, selectedCities }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -77,15 +78,17 @@ export default function FlightMapInner({ originCity, cityCoords, destinations, o
 
   const origin = cityCoords[originCity];
   const originPos = [origin.lat, origin.lng];
+  const hasSelected = selectedCities && selectedCities.length > 0;
 
   const allPoints = [originPos];
-  const routes = destinations
+  const markers = destinations
     .filter(d => cityCoords[d.destinationCity])
     .map(d => {
       const dest = cityCoords[d.destinationCity];
       const destPos = [dest.lat, dest.lng];
       allPoints.push(destPos);
-      return { ...d, destPos, curvePoints: getCurvePoints(originPos, destPos) };
+      const isSelected = selectedCities?.includes(d.destinationCity);
+      return { ...d, destPos, isSelected };
     });
 
   const bounds = L.latLngBounds(allPoints);
@@ -94,8 +97,8 @@ export default function FlightMapInner({ originCity, cityCoords, destinations, o
     <MapContainer
       center={originPos}
       zoom={3}
-      style={{ height: '100%', width: '100%' }}
-      scrollWheelZoom={false}
+      style={{ height: '100%', width: '100%', background: '#e8f4f8' }}
+      scrollWheelZoom={true}
       zoomControl={true}
     >
       <FitBounds bounds={bounds} />
@@ -104,49 +107,49 @@ export default function FlightMapInner({ originCity, cityCoords, destinations, o
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      {/* Origin */}
-      <Marker position={originPos} icon={originIcon}>
-        <Popup><strong>{originCity}</strong><br />Your departure city</Popup>
+      {/* Origin dot */}
+      <Marker position={originPos} icon={createOriginIcon()}>
+        <Popup>
+          <div style="text-align:center">
+            <strong>{originCity}</strong><br/>
+            <span style="color:#666;font-size:12px">Your departure</span>
+          </div>
+        </Popup>
       </Marker>
 
-      {/* Routes and destinations */}
-      {routes.map((route) => {
-        const destIcon = createCityIcon('#3B82F6', route.destinationCity[0]);
-        const midIdx = Math.floor(route.curvePoints.length / 2);
-        const midPoint = route.curvePoints[midIdx];
-        const priceIcon = createPriceLabel(route.cheapestPrice);
-
+      {/* Route lines — only shown after a search */}
+      {hasSelected && markers.filter(m => m.isSelected).map((m, idx, arr) => {
+        const from = idx === 0 ? originPos : arr[idx - 1].destPos;
+        const to = m.destPos;
+        const curve = getCurvePoints(from, to);
         return (
-          <div key={route.destinationCity}>
-            {/* Arc line */}
-            <Polyline
-              positions={route.curvePoints}
-              pathOptions={{ color: '#7C3AED', weight: 2, opacity: 0.6, dashArray: '6, 4' }}
-              eventHandlers={{
-                click: () => onSelectRoute?.(originCity, route.destinationCity)
-              }}
-            />
-
-            {/* Price label at midpoint */}
-            <Marker position={midPoint} icon={priceIcon} interactive={false} />
-
-            {/* Destination marker */}
-            <Marker
-              position={route.destPos}
-              icon={destIcon}
-              eventHandlers={{
-                click: () => onSelectRoute?.(originCity, route.destinationCity)
-              }}
-            >
-              <Popup>
-                <strong>{route.destinationCity}</strong><br />
-                From <strong>€{Math.round(route.cheapestPrice)}</strong><br />
-                {route.flightCount} flights available
-              </Popup>
-            </Marker>
-          </div>
+          <Polyline
+            key={`line-${m.destinationCity}`}
+            positions={curve}
+            pathOptions={{ color: '#7C3AED', weight: 2.5, opacity: 0.7, dashArray: '6, 4' }}
+          />
         );
       })}
+
+      {/* Price bubbles on destinations */}
+      {markers.map((m) => (
+        <Marker
+          key={m.destinationCity}
+          position={m.destPos}
+          icon={createPriceBubble(m.destinationCity, m.cheapestPrice, m.isSelected)}
+          eventHandlers={{
+            click: () => onSelectRoute?.(originCity, m.destinationCity)
+          }}
+        >
+          <Popup>
+            <div style="min-width:140px">
+              <strong style="font-size:14px">{m.destinationCity}</strong><br/>
+              <span style="color:#1a73e8;font-weight:700;font-size:16px">€{Math.round(m.cheapestPrice)}</span><br/>
+              <span style="color:#666;font-size:12px">{m.flightCount} flight{m.flightCount > 1 ? 's' : ''} available</span>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }

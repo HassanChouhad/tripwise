@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { MapPin, Loader, Navigation } from 'lucide-react';
+import { Loader, Navigation } from 'lucide-react';
 import styles from './FlightMap.module.css';
 
 const MapInner = dynamic(() => import('./FlightMapInner'), { ssr: false });
@@ -34,11 +34,22 @@ function findNearestCity(lat, lng) {
 
 export { cityCoords };
 
-export default function FlightMap({ startDate, onSelectRoute }) {
+export default function FlightMap({ startDate, searchDestinations, onSelectRoute }) {
   const [originCity, setOriginCity] = useState(null);
-  const [destinations, setDestinations] = useState([]);
+  const [allDestinations, setAllDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [geoStatus, setGeoStatus] = useState('detecting');
+
+  // Extract city names from search destinations (e.g. "Tokyo, Japan (NRT)" -> "Tokyo")
+  const searchCities = searchDestinations
+    ? searchDestinations.map(d => (d.name || d).split(',')[0].trim()).filter(Boolean)
+    : [];
+  const searchOrigin = searchCities[0] || null;
+  const searchDestCities = searchCities.slice(1);
+  const hasSearch = searchDestCities.length > 0;
+
+  // Use search origin if available, otherwise geolocation
+  const effectiveOrigin = hasSearch ? searchOrigin : originCity;
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -61,19 +72,20 @@ export default function FlightMap({ startDate, onSelectRoute }) {
   }, []);
 
   const fetchDestinations = useCallback(async () => {
-    if (!originCity) return;
+    const origin = effectiveOrigin;
+    if (!origin) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ origin: originCity });
+      const params = new URLSearchParams({ origin });
       if (startDate) params.set('date', startDate);
       const res = await fetch(`/api/flights/destinations?${params}`);
       const data = await res.json();
-      setDestinations(data.destinations || []);
+      setAllDestinations(data.destinations || []);
     } catch (e) {
       console.error('Failed to fetch destinations:', e);
     }
     setLoading(false);
-  }, [originCity, startDate]);
+  }, [effectiveOrigin, startDate]);
 
   useEffect(() => {
     fetchDestinations();
@@ -83,29 +95,41 @@ export default function FlightMap({ startDate, onSelectRoute }) {
     setOriginCity(city);
   };
 
+  // Filter destinations: if user searched, show only those routes; otherwise show all
+  const displayDestinations = hasSearch
+    ? allDestinations.filter(d => searchDestCities.includes(d.destinationCity))
+    : allDestinations;
+
+  const title = hasSearch
+    ? `Route: ${searchCities.join(' → ')}`
+    : `Explore Flights from ${effectiveOrigin || '...'}`;
+
+  const subtitle = hasSearch
+    ? `${searchDestCities.length} destination${searchDestCities.length > 1 ? 's' : ''} selected${startDate ? ` • ${startDate}` : ''}`
+    : `${geoStatus === 'detected' ? 'Based on your location' : 'Select your departure city'}${startDate ? ` • ${startDate}` : ' • All available dates'}`;
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>
-            <Navigation size={18} /> Explore Flights from {originCity || '...'}
+            <Navigation size={18} /> {title}
           </h2>
-          <p className={styles.subtitle}>
-            {geoStatus === 'detected' ? 'Based on your location' : 'Select your departure city'}
-            {startDate ? ` • ${startDate}` : ' • All available dates'}
-          </p>
+          <p className={styles.subtitle}>{subtitle}</p>
         </div>
-        <div className={styles.originSelector}>
-          {Object.keys(cityCoords).map(city => (
-            <button
-              key={city}
-              className={`${styles.originBtn} ${city === originCity ? styles.originBtnActive : ''}`}
-              onClick={() => handleCitySelect(city)}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
+        {!hasSearch && (
+          <div className={styles.originSelector}>
+            {Object.keys(cityCoords).map(city => (
+              <button
+                key={city}
+                className={`${styles.originBtn} ${city === originCity ? styles.originBtnActive : ''}`}
+                onClick={() => handleCitySelect(city)}
+              >
+                {city}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.mapWrapper}>
@@ -116,21 +140,23 @@ export default function FlightMap({ startDate, onSelectRoute }) {
           </div>
         ) : (
           <MapInner
-            originCity={originCity}
+            key={`${effectiveOrigin}-${startDate}`}
+            originCity={effectiveOrigin}
             cityCoords={cityCoords}
-            destinations={destinations}
+            destinations={displayDestinations}
+            selectedCities={hasSearch ? searchDestCities : []}
             onSelectRoute={onSelectRoute}
           />
         )}
       </div>
 
-      {!loading && destinations.length > 0 && (
+      {!loading && displayDestinations.length > 0 && (
         <div className={styles.routeList}>
-          {destinations.map((dest) => (
+          {displayDestinations.map((dest) => (
             <button
               key={dest.destinationCity}
               className={styles.routeCard}
-              onClick={() => onSelectRoute?.(originCity, dest.destinationCity)}
+              onClick={() => onSelectRoute?.(effectiveOrigin, dest.destinationCity)}
             >
               <span className={styles.routeCity}>{dest.destinationCity}</span>
               <span className={styles.routePrice}>from €{Math.round(dest.cheapestPrice)}</span>
