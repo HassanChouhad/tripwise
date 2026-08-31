@@ -49,6 +49,19 @@ export default function SearchBar({ onSearchResults }) {
   const [travelers, setTravelers] = useState(2);
   const [classType, setClassType] = useState('Economy');
 
+  const handleTripTypeChange = (type) => {
+    setTripType(type);
+    if (type !== 'Multi-city') {
+      // Keep origin, keep only first destination (or add one empty)
+      const origin = destinations.find(d => d.isOrigin) || destinations[0];
+      const firstDest = destinations.find(d => !d.isOrigin);
+      setDestinations(firstDest
+        ? [origin, firstDest]
+        : [origin, { id: 2, name: '', isOrigin: false }]
+      );
+    }
+  };
+
   const updateDestinationName = (id, newName) => {
     setDestinations(destinations.map(d => d.id === id ? { ...d, name: newName } : d));
   };
@@ -86,7 +99,7 @@ export default function SearchBar({ onSearchResults }) {
       }
 
       if (onSearchResults) {
-        onSearchResults(allFlights, nonEmptyDests, startDate, endDate);
+        onSearchResults(allFlights, nonEmptyDests, startDate, tripType === 'One Way' ? null : endDate);
       } else {
         alert(`Found ${allFlights.length} flight options across ${nonEmptyDests.length - 1} leg(s).`);
       }
@@ -115,7 +128,7 @@ export default function SearchBar({ onSearchResults }) {
           <button
             key={type}
             className={`${styles.tripTypeTab} ${tripType === type ? styles.tripTypeTabActive : ''}`}
-            onClick={() => setTripType(type)}
+            onClick={() => handleTripTypeChange(type)}
             id={`tab-${type.toLowerCase().replace(/\s+/g, '-')}`}
           >
             {type}
@@ -143,7 +156,7 @@ export default function SearchBar({ onSearchResults }) {
                   </option>
                 ))}
               </select>
-              {!dest.isOrigin && destinations.length > 2 && (
+              {!dest.isOrigin && tripType === 'Multi-city' && destinations.length > 2 && (
                 <button
                   className={styles.chipRemove}
                   onClick={() => removeDestination(dest.id)}
@@ -154,15 +167,17 @@ export default function SearchBar({ onSearchResults }) {
               )}
             </div>
           ))}
-          <button className={styles.addDestBtn} onClick={addDestination} id="add-destination-btn">
-            <Plus size={14} />
-            Add Destination
-          </button>
+          {tripType === 'Multi-city' && (
+            <button className={styles.addDestBtn} onClick={addDestination} id="add-destination-btn">
+              <Plus size={14} />
+              Add Destination
+            </button>
+          )}
         </div>
 
         <div className={styles.searchFields}>
           <div className={styles.fieldGroup}>
-            <span className={styles.fieldLabel}>From</span>
+            <span className={styles.fieldLabel}>{tripType === 'One Way' ? 'Date' : 'From'}</span>
             <div className={styles.fieldInput}>
               <input
                 type="date"
@@ -174,19 +189,21 @@ export default function SearchBar({ onSearchResults }) {
             </div>
           </div>
 
-          <div className={styles.fieldGroup}>
-            <span className={styles.fieldLabel}>To</span>
-            <div className={styles.fieldInput}>
-              <input
-                type="date"
-                value={endDate}
-                min={startDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                id="date-end-input"
-                style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: '500', outline: 'none', cursor: 'pointer', flex: 1 }}
-              />
+          {tripType !== 'One Way' && (
+            <div className={styles.fieldGroup}>
+              <span className={styles.fieldLabel}>To</span>
+              <div className={styles.fieldInput}>
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  id="date-end-input"
+                  style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: '500', outline: 'none', cursor: 'pointer', flex: 1 }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className={styles.fieldGroup}>
             <span className={styles.fieldLabel}>Travelers</span>

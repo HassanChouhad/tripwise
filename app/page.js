@@ -34,7 +34,7 @@ export default function Home() {
         <div style={{ background: 'var(--color-bg-secondary)', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-accent-primary)' }}>
           <h3>🔍 Search Results ({searchResults.searchResults?.length || searchResults.flights?.length || 0} flight routes found in database)</h3>
           <p className="text-caption">
-            Route: {searchResults.destinations.map(d => d.name).join(' → ')} • {searchResults.startDate} to {searchResults.endDate}
+            Route: {searchResults.destinations.map(d => d.name).join(' → ')} • {searchResults.startDate}{searchResults.endDate ? ` to ${searchResults.endDate}` : ''}
           </p>
         </div>
       )}
