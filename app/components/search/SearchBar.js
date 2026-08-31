@@ -49,10 +49,12 @@ export default function SearchBar({ onSearchResults }) {
   const [travelers, setTravelers] = useState(2);
   const [classType, setClassType] = useState('Economy');
 
+  const clearResults = () => onSearchResults?.(null);
+
   const handleTripTypeChange = (type) => {
     setTripType(type);
+    clearResults();
     if (type !== 'Multi-city') {
-      // Keep origin, keep only first destination (or add one empty)
       const origin = destinations.find(d => d.isOrigin) || destinations[0];
       const firstDest = destinations.find(d => !d.isOrigin);
       setDestinations(firstDest
@@ -87,7 +89,7 @@ export default function SearchBar({ onSearchResults }) {
     try {
       const allFlights = [];
 
-      // Fetch flights for each consecutive leg
+      // Fetch outbound flights for each consecutive leg
       for (let i = 0; i < nonEmptyDests.length - 1; i++) {
         const originCity = nonEmptyDests[i].name.split(',')[0].trim();
         const destCity = nonEmptyDests[i + 1].name.split(',')[0].trim();
@@ -98,10 +100,26 @@ export default function SearchBar({ onSearchResults }) {
         }
       }
 
+      // For Round Trip: also fetch return leg (last destination → origin) on endDate
+      if (tripType === 'Round Trip' && endDate) {
+        const lastDest = nonEmptyDests[nonEmptyDests.length - 1].name.split(',')[0].trim();
+        const originCity = nonEmptyDests[0].name.split(',')[0].trim();
+        const res = await fetch(`/api/flights?date=${endDate}&origin=${lastDest}&destination=${originCity}`);
+        const data = await res.json();
+        if (data.flights && data.flights.length > 0) {
+          allFlights.push(...data.flights);
+        }
+      }
+
+      // Build full destination list including return for display
+      const displayDests = tripType === 'Round Trip'
+        ? [...nonEmptyDests, { ...nonEmptyDests[0], id: 999, isOrigin: false }]
+        : nonEmptyDests;
+
       if (onSearchResults) {
-        onSearchResults(allFlights, nonEmptyDests, startDate, tripType === 'One Way' ? null : endDate);
+        onSearchResults(allFlights, displayDests, startDate, tripType === 'One Way' ? null : endDate);
       } else {
-        alert(`Found ${allFlights.length} flight options across ${nonEmptyDests.length - 1} leg(s).`);
+        alert(`Found ${allFlights.length} flight options across ${displayDests.length - 1} leg(s).`);
       }
     } catch (e) {
       console.error(e);

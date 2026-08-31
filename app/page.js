@@ -11,6 +11,10 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState(null);
 
   const handleSearchResults = (flights, destinations, startDate, endDate) => {
+    if (flights === null) {
+      setSearchResults(null);
+      return;
+    }
     setSearchResults({ flights, destinations, startDate, endDate });
   };
 
