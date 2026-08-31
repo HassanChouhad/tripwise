@@ -42,10 +42,13 @@ const features = [
 ];
 
 export default function SearchBar({ onSearchResults }) {
+  const today = new Date().toISOString().split('T')[0];
+  const inTenDays = new Date(Date.now() + 10 * 86400000).toISOString().split('T')[0];
+
   const [tripType, setTripType] = useState('Multi-city');
   const [destinations, setDestinations] = useState(defaultDestinations);
-  const [startDate, setStartDate] = useState('2025-10-10');
-  const [endDate, setEndDate] = useState('2025-10-20');
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(inTenDays);
   const [travelers, setTravelers] = useState(2);
   const [classType, setClassType] = useState('Economy');
 
