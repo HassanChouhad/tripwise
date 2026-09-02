@@ -47,22 +47,39 @@ function getHotelImage(hotel, index) {
 export default function HotelCarousel({ searchResults }) {
   const [hotels, setHotels] = useState(hotelData.hotels);
   const [addedHotels, setAddedHotels] = useState({});
+  const [activeCity, setActiveCity] = useState(null);
   const { savedTrips, updateTrip } = useSavedTrips();
 
-  const searchCity = searchResults?.destinations?.[1]?.name?.split(',')[0] || searchResults?.destinations?.[0]?.name?.split(',')[0];
+  // Get all destination cities (skip origin)
+  const allCities = (searchResults?.destinations || [])
+    .slice(1)
+    .map(d => (d.name || d).split(',')[0].trim())
+    .filter(Boolean);
+  const searchDate = searchResults?.startDate || '';
 
   useEffect(() => {
-    if (searchCity) {
-      fetch(`/api/hotels?city=${searchCity}&date=${searchResults?.startDate || ''}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.hotels && data.hotels.length > 0) {
-            setHotels(data.hotels);
-          }
-        })
-        .catch(console.error);
+    if (allCities.length > 0 && !activeCity) {
+      setActiveCity(allCities[0]);
     }
-  }, [searchCity, searchResults?.startDate]);
+  }, [allCities.join(',')]);
+
+  useEffect(() => {
+    if (allCities.length === 0) return;
+
+    Promise.all(
+      allCities.map(city =>
+        fetch(`/api/hotels?city=${city}&date=${searchDate}`)
+          .then(res => res.json())
+          .then(data => data.hotels || [])
+          .catch(() => [])
+      )
+    ).then(results => {
+      const combined = results.flat();
+      if (combined.length > 0) {
+        setHotels(combined);
+      }
+    });
+  }, [allCities.join(','), searchDate]);
 
   const addHotelToTrip = (hotel) => {
     const latestTrip = savedTrips[0];
@@ -88,11 +105,16 @@ export default function HotelCarousel({ searchResults }) {
     setAddedHotels(prev => ({ ...prev, [hotel.id]: true }));
   };
 
+  // Filter hotels by active city
+  const filteredHotels = activeCity
+    ? hotels.filter(h => h.city === activeCity)
+    : hotels;
+
   return (
     <div className={styles.section}>
       <div className={styles.header}>
         <div className={styles.title}>
-          <span>Recommended Hotels {searchCity ? `in ${searchCity}` : ''}</span> 🏨
+          <span>Recommended Hotels</span> 🏨
         </div>
         {savedTrips.length > 0 && (
           <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-tertiary)' }}>
@@ -101,8 +123,33 @@ export default function HotelCarousel({ searchResults }) {
         )}
       </div>
 
+      {/* City tabs */}
+      {allCities.length > 1 && (
+        <div style={{ display: 'flex', gap: '6px', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
+          {allCities.map(city => (
+            <button
+              key={city}
+              onClick={() => setActiveCity(city)}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: city === activeCity ? 'rgba(124, 58, 237, 0.15)' : 'var(--color-bg-tertiary)',
+                color: city === activeCity ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                border: `1px solid ${city === activeCity ? 'rgba(124, 58, 237, 0.4)' : 'var(--color-border)'}`,
+                transition: 'all 150ms ease'
+              }}
+            >
+              {city}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={styles.grid}>
-        {hotels.map((hotel, index) => (
+        {filteredHotels.map((hotel, index) => (
           <div key={hotel.id} className={styles.card}>
             <div className={styles.imageWrapper}>
               {getHotelImage(hotel, index) ? (

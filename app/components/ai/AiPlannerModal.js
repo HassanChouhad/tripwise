@@ -11,25 +11,55 @@ const knownCities = ['Paris', 'Marseille', 'Tokyo', 'Kyoto', 'Osaka', 'London', 
 function parseUserMessage(msg) {
   const lower = msg.toLowerCase();
 
-  // Extract cities
-  const destinations = knownCities.filter(city => lower.includes(city.toLowerCase()));
+  // Extract cities in order of appearance
+  const destinations = [];
+  const lowerCities = knownCities.map(c => ({ name: c, lower: c.toLowerCase() }));
+  let searchPos = 0;
+  while (searchPos < lower.length) {
+    let earliest = null;
+    let earliestIdx = Infinity;
+    for (const city of lowerCities) {
+      const idx = lower.indexOf(city.lower, searchPos);
+      if (idx !== -1 && idx < earliestIdx && !destinations.includes(city.name)) {
+        earliest = city.name;
+        earliestIdx = idx;
+      }
+    }
+    if (earliest) {
+      destinations.push(earliest);
+      searchPos = earliestIdx + earliest.length;
+    } else {
+      break;
+    }
+  }
 
   // Extract traveler count
   const travelerMatch = lower.match(/(\d+)\s*traveler/);
   const travelers = travelerMatch ? parseInt(travelerMatch[1]) : 1;
 
-  // Extract dates
+  // Extract dates — support DD/MM, DD-MM, "DD month", "month DD"
   const months = { january: '01', february: '02', march: '03', april: '04', may: '05', june: '06', july: '07', august: '08', september: '09', october: '10', november: '11', december: '12' };
   let startDate = null;
   let endDate = null;
 
-  // Try "from DD month" or "DD month" patterns
-  const datePattern = /(\d{1,2})\s*(january|february|march|april|may|june|july|august|september|october|november|december)/gi;
-  const dateMatches = [...msg.matchAll(datePattern)];
-  if (dateMatches.length > 0) {
-    const day = dateMatches[0][1].padStart(2, '0');
-    const month = months[dateMatches[0][2].toLowerCase()];
-    startDate = `2025-${month}-${day}`;
+  // Try DD/MM or DD-MM format
+  const slashDate = msg.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if (slashDate) {
+    const day = slashDate[1].padStart(2, '0');
+    const month = slashDate[2].padStart(2, '0');
+    const year = slashDate[3] ? (slashDate[3].length === 2 ? '20' + slashDate[3] : slashDate[3]) : new Date().getFullYear().toString();
+    startDate = `${year}-${month}-${day}`;
+  }
+
+  // Try "DD month" or "month DD"
+  if (!startDate) {
+    const datePattern = /(\d{1,2})\s*(january|february|march|april|may|june|july|august|september|october|november|december)/gi;
+    const dateMatches = [...msg.matchAll(datePattern)];
+    if (dateMatches.length > 0) {
+      const day = dateMatches[0][1].padStart(2, '0');
+      const month = months[dateMatches[0][2].toLowerCase()];
+      startDate = `${new Date().getFullYear()}-${month}-${day}`;
+    }
   }
 
   // Try "X days" or "X-day"
@@ -41,8 +71,9 @@ function parseUserMessage(msg) {
     end.setDate(end.getDate() + days);
     endDate = end.toISOString().split('T')[0];
   } else {
-    startDate = '2025-10-10';
-    endDate = new Date(new Date(startDate).getTime() + days * 86400000).toISOString().split('T')[0];
+    const today = new Date();
+    startDate = today.toISOString().split('T')[0];
+    endDate = new Date(today.getTime() + days * 86400000).toISOString().split('T')[0];
   }
 
   // Detect intent
@@ -137,84 +168,123 @@ export default function AiPlannerModal({ isOpen, onClose }) {
         return;
       }
 
-      const origin = parsed.destinations[0];
-      const destCities = parsed.destinations.length > 1 ? parsed.destinations.slice(1) : parsed.destinations;
+      const allDests = parsed.destinations;
+      const origin = allDests[0];
+      const destCities = allDests.slice(1);
+
+      if (destCities.length === 0) {
+        setMessages(prev => [...prev, {
+          sender: 'ai',
+          toolsUsed: [],
+          text: `You mentioned ${origin}, but I need at least one destination city too. For example: "Trip from ${origin} to Tokyo and Kyoto".`
+        }]);
+        setLoading(false);
+        return;
+      }
 
       // 1. Create trip
       const trip = await callTool('create_trip', {
-        name: `Trip to ${destCities.join(', ')}`,
-        destinations: parsed.destinations,
+        name: `Trip: ${allDests.join(' → ')}`,
+        destinations: allDests,
         start_date: parsed.startDate,
         end_date: parsed.endDate,
         travelers: parsed.travelers
       });
       toolsUsed.push('create_trip');
 
-      // 2. Search flights from origin
-      const flights = await callTool('search_flights', { origin });
-      toolsUsed.push('search_flights');
+      // 2. Search flights for EACH consecutive leg
+      const allFlights = [];
+      const flightLegs = [];
+      for (let i = 0; i < allDests.length - 1; i++) {
+        const fromCity = allDests[i];
+        const toCity = allDests[i + 1];
+        const flights = await callTool('search_flights', { origin: fromCity, destination: toCity });
+        toolsUsed.push('search_flights');
 
-      // 3. Select best flight
-      let selectedFlight = null;
-      if (Array.isArray(flights) && flights.length > 0) {
-        selectedFlight = flights[0];
-        await callTool('select_flight', { trip_id: trip.trip_id, flight_id: selectedFlight.id });
-        toolsUsed.push('select_flight');
+        if (Array.isArray(flights) && flights.length > 0) {
+          const best = flights[0]; // cheapest (sorted by price)
+          allFlights.push(best);
+          await callTool('select_flight', { trip_id: trip.trip_id, flight_id: best.id });
+          toolsUsed.push('select_flight');
+          flightLegs.push({
+            flight: `${best.airline} (${best.airlineCode}${best.flightNumber?.replace(best.airlineCode, '') || ''})`,
+            route: `${fromCity} → ${toCity}`,
+            price: best.price,
+            departure: best.departureTime,
+            arrival: best.arrivalTime,
+            duration: best.duration,
+            stops: best.stops
+          });
+        }
       }
 
-      // 4. Search hotels in first destination (not origin)
-      const hotelCity = destCities[0] || origin;
-      const hotels = await callTool('search_hotels', { city: hotelCity });
-      toolsUsed.push('search_hotels');
+      // 3. Search hotels for each destination city
+      const allHotels = [];
+      for (const city of destCities) {
+        const hotels = await callTool('search_hotels', { city });
+        toolsUsed.push('search_hotels');
 
-      // 5. Get hotel details & select
-      let selectedHotel = null;
-      if (Array.isArray(hotels) && hotels.length > 0) {
-        const hotelDetails = await callTool('get_hotel_details', { hotel_id: hotels[0].id });
-        toolsUsed.push('get_hotel_details');
-        selectedHotel = hotelDetails;
-        await callTool('select_hotel', { trip_id: trip.trip_id, hotel_id: hotels[0].id });
-        toolsUsed.push('select_hotel');
+        if (Array.isArray(hotels) && hotels.length > 0) {
+          const hotelDetails = await callTool('get_hotel_details', { hotel_id: hotels[0].id });
+          toolsUsed.push('get_hotel_details');
+          await callTool('select_hotel', { trip_id: trip.trip_id, hotel_id: hotels[0].id });
+          toolsUsed.push('select_hotel');
+          allHotels.push({
+            name: hotelDetails.name,
+            city: hotelDetails.city,
+            pricePerNight: hotelDetails.pricePerNight,
+            rating: hotelDetails.rating
+          });
+        }
       }
 
-      // 6. Weather & packing
-      await callTool('get_weather_and_packing', { cities: parsed.destinations });
+      // 4. Weather & packing
+      await callTool('get_weather_and_packing', { cities: allDests });
       toolsUsed.push('get_weather_and_packing');
 
-      // 7. Prepare booking
+      // 5. Prepare booking
       const booking = await callTool('prepare_booking', { trip_id: trip.trip_id });
       toolsUsed.push('prepare_booking');
 
-      // 8. Save trip
+      // 6. Calculate total cost
+      const flightTotal = flightLegs.reduce((sum, f) => sum + (f.price || 0), 0);
+      const hotelTotal = allHotels.reduce((sum, h) => sum + (h.pricePerNight || 0), 0);
+      const totalCost = flightTotal + hotelTotal;
+
+      // 7. Save trip with all legs
       saveTrip({
         id: trip.trip_id,
         name: trip.name,
-        destinations: trip.destinations,
-        start_date: trip.start_date,
-        end_date: trip.end_date,
-        travelers: trip.travelers,
-        flights: booking?.flights || [],
-        hotels: booking?.hotels || [],
-        cost: booking?.cost_breakdown?.total,
+        destinations: allDests,
+        start_date: parsed.startDate,
+        end_date: parsed.endDate,
+        travelers: parsed.travelers,
+        flights: flightLegs,
+        hotels: allHotels,
+        cost: totalCost,
         booking_id: booking?.booking_id,
         created_at: new Date().toISOString()
       });
       toolsUsed.push('save_trip');
 
-      const flightInfo = selectedFlight
-        ? `${selectedFlight.originCity} → ${selectedFlight.destinationCity} (${selectedFlight.airline}, €${selectedFlight.price})`
-        : 'No matching flights found in database';
-      const hotelInfo = selectedHotel
-        ? `${selectedHotel.name} in ${selectedHotel.city} (€${selectedHotel.pricePerNight}/night)`
-        : 'No hotels found';
-      const totalCost = booking?.cost_breakdown?.total || 'N/A';
+      // Build response message
+      const flightLines = flightLegs.map(f =>
+        `✈️ ${f.route} — ${f.flight}, €${Math.round(f.price)} (${f.duration}, ${f.stops === 0 ? 'Direct' : f.stops + ' stop'})`
+      ).join('\n');
+
+      const hotelLines = allHotels.map(h =>
+        `🏨 ${h.name} in ${h.city} — €${Math.round(h.pricePerNight)}/night`
+      ).join('\n');
+
+      // Deduplicate toolsUsed for display
+      const uniqueTools = [...new Set(toolsUsed)];
 
       setMessages(prev => [
         ...prev,
         {
           sender: 'ai',
-          toolsUsed,
-          text: `Trip planned and saved!\n\n📍 Destinations: ${parsed.destinations.join(' → ')}\n📅 Dates: ${parsed.startDate} to ${parsed.endDate} (${parsed.days} days)\n👥 Travelers: ${parsed.travelers}\n\n✈️ Flight: ${flightInfo}\n🏨 Hotel: ${hotelInfo}\n🌤️ Weather checked — pack accordingly.\n\n💰 Total: €${totalCost}\n\n✅ Trip saved — say "add to cart" to proceed to checkout.`
+          toolsUsed: uniqueTools,
+          text: `Trip planned and saved!\n\n📍 Route: ${allDests.join(' → ')}\n📅 Dates: ${parsed.startDate} to ${parsed.endDate} (${parsed.days} days)\n👥 Travelers: ${parsed.travelers}\n\n${flightLines}\n\n${hotelLines}\n🌤️ Weather checked — pack accordingly.\n\n💰 Flights: €${Math.round(flightTotal)} | Hotels: €${Math.round(hotelTotal)}\n💰 Total: €${Math.round(totalCost)}\n\n✅ Trip saved — say "add to cart" to proceed to checkout.`
         }
       ]);
     } catch (err) {

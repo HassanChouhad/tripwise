@@ -3,6 +3,8 @@
 import { useSavedTrips } from '../context/SavedTripsContext';
 import { useCart } from '../context/CartContext';
 import ItineraryTimeline from '../components/itinerary/ItineraryTimeline';
+import TripHotels from '../components/hotels/TripHotels';
+import HotelCarousel from '../components/hotels/HotelCarousel';
 import TravelGuide from '../components/travel/TravelGuide';
 import { ShoppingCart } from 'lucide-react';
 
@@ -16,7 +18,7 @@ export default function TripsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
       <div>
         <h1 className="text-display">My Saved Trips</h1>
-        <p className="text-caption">Access your saved itineraries, transport options, and places to visit.</p>
+        <p className="text-caption">Access your saved itineraries, hotels, transport options, and places to visit.</p>
       </div>
 
       {savedTrips.length === 0 ? (
@@ -30,6 +32,7 @@ export default function TripsPage() {
         savedTrips.map((trip) => {
           const inCart = isInCart(trip.id);
           const destinations = (trip.destinations || []).map(d => typeof d === 'string' ? d : d.name);
+          const firstDest = destinations[1] || destinations[0];
           return (
             <div key={trip.id} style={{ marginBottom: 'var(--space-6)', position: 'relative' }}>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)', marginBottom: '8px' }}>
@@ -69,8 +72,23 @@ export default function TripsPage() {
                   🗑️ Delete
                 </button>
               </div>
-              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: destinations.map(d => ({ name: d })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
 
+              {/* Flight itinerary */}
+              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: destinations.map(d => ({ name: d })), startDate: trip.start_date, cost: trip.cost }} />
+
+              {/* Selected hotels with remove option */}
+              {trip.hotels && trip.hotels.length > 0 && (
+                <div style={{ marginTop: 'var(--space-4)' }}>
+                  <TripHotels trip={trip} />
+                </div>
+              )}
+
+              {/* Browse more hotels for this trip */}
+              <div style={{ marginTop: 'var(--space-4)' }}>
+                <HotelCarousel searchResults={{ destinations: destinations.map(d => ({ name: d })) }} />
+              </div>
+
+              {/* Travel guide + map */}
               {destinations.length > 0 && (
                 <div style={{ marginTop: 'var(--space-6)' }}>
                   <TravelGuide destinations={destinations} flights={trip.flights || trip.legs || []} />
