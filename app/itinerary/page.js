@@ -19,7 +19,7 @@ export default function ItineraryPage() {
         savedTrips.map((trip, idx) => {
           const legs = trip.legs || trip.flights || [];
           return (
-            <ItineraryTimeline key={idx} searchResults={{ flights: trip.flights || trip.legs || [], destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
+            <ItineraryTimeline key={idx} hideSaveButton searchResults={{ flights: trip.flights || trip.legs || [], destinations: (trip.destinations || []).map(d => ({ name: typeof d === 'string' ? d : d.name })), startDate: trip.start_date || '2025-10-10', cost: trip.cost }} />
           );
         })
       )}

@@ -6,7 +6,7 @@ import flightData from '../../data/flights.json';
 import { useSavedTrips } from '../../context/SavedTripsContext';
 import styles from './ItineraryTimeline.module.css';
 
-export default function ItineraryTimeline({ searchResults }) {
+export default function ItineraryTimeline({ searchResults, hideSaveButton }) {
   const { saveTrip } = useSavedTrips();
   const [saved, setSaved] = useState(false);
 
@@ -107,15 +107,17 @@ export default function ItineraryTimeline({ searchResults }) {
           </h2>
           <span className={styles.subtitle}>{itinerary.subtitle}</span>
         </div>
-        <button
-          className={styles.viewDetailsBtn}
-          id="save-trip-btn"
-          onClick={handleSaveTrip}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', background: saved ? 'var(--color-accent-green)' : undefined, color: saved ? 'white' : undefined }}
-        >
-          <Bookmark size={14} />
-          {saved ? 'Trip Saved!' : 'Save Trip'}
-        </button>
+        {!hideSaveButton && (
+          <button
+            className={styles.viewDetailsBtn}
+            id="save-trip-btn"
+            onClick={handleSaveTrip}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: saved ? 'var(--color-accent-green)' : undefined, color: saved ? 'white' : undefined }}
+          >
+            <Bookmark size={14} />
+            {saved ? 'Trip Saved!' : 'Save Trip'}
+          </button>
+        )}
       </div>
 
       <div className={styles.contentGrid}>
@@ -158,13 +160,15 @@ export default function ItineraryTimeline({ searchResults }) {
             ))}
           </div>
 
-          <button
-            className={styles.viewTripBtn}
-            id="view-this-trip-btn"
-            onClick={handleSaveTrip}
-          >
-            {saved ? '✓ Trip Saved' : 'Save & View This Trip'}
-          </button>
+          {!hideSaveButton && (
+            <button
+              className={styles.viewTripBtn}
+              id="view-this-trip-btn"
+              onClick={handleSaveTrip}
+            >
+              {saved ? '✓ Trip Saved' : 'Save & View This Trip'}
+            </button>
+          )}
         </div>
       </div>
     </div>

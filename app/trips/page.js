@@ -74,7 +74,7 @@ export default function TripsPage() {
               </div>
 
               {/* Flight itinerary */}
-              <ItineraryTimeline searchResults={{ flights: trip.flights || trip.legs || [], destinations: destinations.map(d => ({ name: d })), startDate: trip.start_date, cost: trip.cost }} />
+              <ItineraryTimeline hideSaveButton searchResults={{ flights: trip.flights || trip.legs || [], destinations: destinations.map(d => ({ name: d })), startDate: trip.start_date, cost: trip.cost }} />
 
               {/* Selected hotels with remove option */}
               {trip.hotels && trip.hotels.length > 0 && (
