@@ -67,6 +67,23 @@ function FitBounds({ bounds }) {
   return null;
 }
 
+function RecenterButton({ bounds }) {
+  const map = useMap();
+  return (
+    <button
+      onClick={() => bounds && bounds.isValid() && map.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 })}
+      title="Reset view"
+      style={{
+        position: 'absolute', top: '10px', right: '10px', zIndex: 1000,
+        background: 'white', border: '2px solid rgba(0,0,0,0.2)', borderRadius: '4px',
+        width: '34px', height: '34px', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '16px', lineHeight: 1, boxShadow: '0 1px 4px rgba(0,0,0,0.15)'
+      }}
+    >⌖</button>
+  );
+}
+
 export default function FlightMapInner({ originCity, cityCoords, destinations, onSelectRoute, selectedCities }) {
   const [mounted, setMounted] = useState(false);
 
@@ -102,6 +119,7 @@ export default function FlightMapInner({ originCity, cityCoords, destinations, o
       zoomControl={true}
     >
       <FitBounds bounds={bounds} />
+      <RecenterButton bounds={bounds} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
