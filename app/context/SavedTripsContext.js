@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useCart } from './CartContext';
 
 const SavedTripsContext = createContext();
 
@@ -8,6 +9,7 @@ export function SavedTripsProvider({ children }) {
   const [savedTrips, setSavedTrips] = useState([]);
   const [isHydrated, setIsHydrated] = useState(false);
   const hydrated = useRef(false);
+  const { cart, updateCartItem } = useCart();
 
   useEffect(() => {
     const stored = localStorage.getItem('tripwise_saved_trips');
@@ -32,6 +34,12 @@ export function SavedTripsProvider({ children }) {
       localStorage.setItem('tripwise_saved_trips', JSON.stringify(updated));
       return updated;
     });
+    // Sync to cart if this trip is in the cart
+    const inCart = cart.some(item => item.id === updatedTrip.id);
+    if (inCart) {
+      const { quantity, ...tripData } = updatedTrip;
+      updateCartItem(updatedTrip.id, tripData);
+    }
   };
 
   const deleteTrip = (id) => {

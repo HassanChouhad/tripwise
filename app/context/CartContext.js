@@ -46,6 +46,12 @@ export function CartProvider({ children }) {
     setCart([]);
   };
 
+  const updateCartItem = (tripId, updatedFields) => {
+    setCart(prev => prev.map(item =>
+      item.id === tripId ? { ...item, ...updatedFields } : item
+    ));
+  };
+
   const cartTotal = cart.reduce((sum, item) => {
     const itemCost = (item.cost || 0) * (item.quantity || 1);
     return sum + itemCost;
@@ -54,7 +60,7 @@ export function CartProvider({ children }) {
   const cartCount = cart.length;
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, isHydrated }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, updateCartItem, clearCart, cartTotal, cartCount, isHydrated }}>
       {children}
     </CartContext.Provider>
   );
